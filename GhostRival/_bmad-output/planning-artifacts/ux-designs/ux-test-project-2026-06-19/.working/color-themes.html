@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Rival — Color Direction</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #fff; padding: 32px 24px; }
+  h1 { font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; color: #555; margin-bottom: 48px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 900px; }
+  .theme { border-radius: 16px; overflow: hidden; }
+  .theme-header { padding: 20px 24px 16px; }
+  .theme-name { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .theme-tagline { font-size: 12px; opacity: 0.5; letter-spacing: 0.05em; text-transform: uppercase; }
+  .swatches { display: flex; gap: 0; }
+  .swatch { flex: 1; height: 56px; }
+  .preview { padding: 20px 24px; }
+  .preview-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.4; margin-bottom: 12px; }
+  .exercise-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .exercise-name { font-size: 15px; font-weight: 600; }
+  .ghost-data { font-size: 13px; }
+  .current-data { font-size: 14px; font-weight: 700; }
+  .pr-badge { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; margin-top: 6px; display: inline-block; }
+
+  /* Theme 1 — WRAITH */
+  .wraith { background: #0d0d0f; border: 1px solid #1a1a20; }
+  .wraith .theme-header { background: #0d0d0f; }
+  .wraith .theme-name { color: #00e5ff; }
+  .wraith .ghost-data { color: rgba(0,229,255,0.35); }
+  .wraith .current-data { color: #ffffff; }
+  .wraith .pr-badge { background: #ff6b00; color: #fff; }
+  .wraith-s1 { background: #0d0d0f; }
+  .wraith-s2 { background: #141418; }
+  .wraith-s3 { background: #00e5ff; }
+  .wraith-s4 { background: #ff6b00; }
+  .wraith-s5 { background: #ffffff; }
+
+  /* Theme 2 — SHADE */
+  .shade { background: #0e0b14; border: 1px solid #1e1828; }
+  .shade .theme-header { background: #0e0b14; }
+  .shade .theme-name { color: #c084fc; }
+  .shade .ghost-data { color: rgba(192,132,252,0.3); }
+  .shade .current-data { color: #f0f0f0; }
+  .shade .pr-badge { background: #facc15; color: #0e0b14; }
+  .shade-s1 { background: #0e0b14; }
+  .shade-s2 { background: #160f22; }
+  .shade-s3 { background: #c084fc; }
+  .shade-s4 { background: #facc15; }
+  .shade-s5 { background: #f0f0f0; }
+
+  /* Theme 3 — PHANTOM */
+  .phantom { background: #080808; border: 1px solid #181818; }
+  .phantom .theme-header { background: #080808; }
+  .phantom .theme-name { color: #f1f5f9; }
+  .phantom .ghost-data { color: rgba(241,245,249,0.2); }
+  .phantom .current-data { color: #ffffff; }
+  .phantom .pr-badge { background: #ef4444; color: #fff; }
+  .phantom-s1 { background: #080808; }
+  .phantom-s2 { background: #111111; }
+  .phantom-s3 { background: #1c1c1c; }
+  .phantom-s4 { background: #ef4444; }
+  .phantom-s5 { background: #ffffff; }
+
+  /* Theme 4 — SPECTER */
+  .specter { background: #080d14; border: 1px solid #0f1a2a; }
+  .specter .theme-header { background: #080d14; }
+  .specter .theme-name { color: #22d3ee; }
+  .specter .ghost-data { color: rgba(34,211,238,0.28); }
+  .specter .current-data { color: #e2e8f0; }
+  .specter .pr-badge { background: #22d3ee; color: #080d14; }
+  .specter-s1 { background: #080d14; }
+  .specter-s2 { background: #0d1520; }
+  .specter-s3 { background: #22d3ee; }
+  .specter-s4 { background: #0ea5e9; }
+  .specter-s5 { background: #e2e8f0; }
+
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<h1>Ghost Rival — Color Direction · Choose one</h1>
+<div class="grid">
+
+  <!-- WRAITH -->
+  <div class="theme wraith">
+    <div class="theme-header">
+      <div class="theme-name">1 · WRAITH</div>
+      <div class="theme-tagline">Electric cyan ghost · Orange PR burst</div>
+    </div>
+    <div class="swatches">
+      <div class="swatch wraith-s1"></div>
+      <div class="swatch wraith-s2"></div>
+      <div class="swatch wraith-s3"></div>
+      <div class="swatch wraith-s4"></div>
+      <div class="swatch wraith-s5"></div>
+    </div>
+    <div class="preview">
+      <div class="preview-label">Bench Press · Active Session</div>
+      <div class="exercise-row wraith">
+        <div>
+          <div class="exercise-name">Bench Press</div>
+          <div class="ghost-data">Ghost: 80kg × 5</div>
+        </div>
+        <div style="text-align:right">
+          <div class="current-data">82.5kg × 5</div>
+          <div class="pr-badge" style="background:#ff6b00">NEW PR</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHADE -->
+  <div class="theme shade">
+    <div class="theme-header">
+      <div class="theme-name">2 · SHADE</div>
+      <div class="theme-tagline">Deep violet ghost · Gold PR burst</div>
+    </div>
+    <div class="swatches">
+      <div class="swatch shade-s1"></div>
+      <div class="swatch shade-s2"></div>
+      <div class="swatch shade-s3"></div>
+      <div class="swatch shade-s4"></div>
+      <div class="swatch shade-s5"></div>
+    </div>
+    <div class="preview">
+      <div class="preview-label">Bench Press · Active Session</div>
+      <div class="exercise-row shade">
+        <div>
+          <div class="exercise-name">Bench Press</div>
+          <div class="ghost-data">Ghost: 80kg × 5</div>
+        </div>
+        <div style="text-align:right">
+          <div class="current-data" style="color:#f0f0f0">82.5kg × 5</div>
+          <div class="pr-badge" style="background:#facc15;color:#0e0b14">NEW PR</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHANTOM -->
+  <div class="theme phantom">
+    <div class="theme-header">
+      <div class="theme-name">3 · PHANTOM</div>
+      <div class="theme-tagline">Monochrome ghost · Blood red PR</div>
+    </div>
+    <div class="swatches">
+      <div class="swatch phantom-s1"></div>
+      <div class="swatch phantom-s2"></div>
+      <div class="swatch phantom-s3"></div>
+      <div class="swatch phantom-s4"></div>
+      <div class="swatch phantom-s5"></div>
+    </div>
+    <div class="preview">
+      <div class="preview-label">Bench Press · Active Session</div>
+      <div class="exercise-row phantom">
+        <div>
+          <div class="exercise-name">Bench Press</div>
+          <div class="ghost-data">Ghost: 80kg × 5</div>
+        </div>
+        <div style="text-align:right">
+          <div class="current-data">82.5kg × 5</div>
+          <div class="pr-badge" style="background:#ef4444">NEW PR</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPECTER -->
+  <div class="theme specter">
+    <div class="theme-header">
+      <div class="theme-name">4 · SPECTER</div>
+      <div class="theme-tagline">Dark navy · Cyan ghost + PR</div>
+    </div>
+    <div class="swatches">
+      <div class="swatch specter-s1"></div>
+      <div class="swatch specter-s2"></div>
+      <div class="swatch specter-s3"></div>
+      <div class="swatch specter-s4"></div>
+      <div class="swatch specter-s5"></div>
+    </div>
+    <div class="preview">
+      <div class="preview-label">Bench Press · Active Session</div>
+      <div class="exercise-row specter">
+        <div>
+          <div class="exercise-name">Bench Press</div>
+          <div class="ghost-data">Ghost: 80kg × 5</div>
+        </div>
+        <div style="text-align:right">
+          <div class="current-data" style="color:#e2e8f0">82.5kg × 5</div>
+          <div class="pr-badge" style="background:#22d3ee;color:#080d14">NEW PR</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

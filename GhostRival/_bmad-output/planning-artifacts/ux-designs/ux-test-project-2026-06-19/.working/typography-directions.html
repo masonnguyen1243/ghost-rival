@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Rival — Typography Direction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d0f; font-family: sans-serif; color: #fff; padding: 32px 24px; }
+  h1 { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: #444; margin-bottom: 40px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 900px; }
+  .card { background: #141418; border-radius: 16px; padding: 28px 24px; border: 1px solid #1e1e26; }
+  .tag { font-family: Inter, sans-serif; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #444; margin-bottom: 6px; }
+  .type-name { font-family: Inter, sans-serif; font-size: 11px; font-weight: 600; color: #00e5ff; margin-bottom: 20px; letter-spacing: 0.05em; }
+  .divider { height: 1px; background: #1e1e26; margin: 16px 0; }
+
+  /* Barlow Condensed */
+  .bc .big-num { font-family: 'Barlow Condensed', sans-serif; font-size: 52px; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -0.01em; }
+  .bc .label { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; color: rgba(0,229,255,0.4); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+  .bc .body { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 500; color: #ccc; margin-top: 14px; }
+  .bc .pr { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; background: #ff6b00; color: #fff; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 8px; text-transform: uppercase; }
+
+  /* Inter */
+  .inter .big-num { font-family: 'Inter', sans-serif; font-size: 42px; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -0.03em; }
+  .inter .label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; color: rgba(0,229,255,0.4); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px; }
+  .inter .body { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 500; color: #ccc; margin-top: 14px; }
+  .inter .pr { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; background: #ff6b00; color: #fff; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 8px; text-transform: uppercase; }
+
+  /* Rajdhani */
+  .raj .big-num { font-family: 'Rajdhani', sans-serif; font-size: 54px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: 0.02em; }
+  .raj .label { font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 500; color: rgba(0,229,255,0.4); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+  .raj .body { font-family: 'Rajdhani', sans-serif; font-size: 19px; font-weight: 500; color: #ccc; margin-top: 14px; }
+  .raj .pr { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.15em; background: #ff6b00; color: #fff; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 8px; text-transform: uppercase; }
+
+  /* DM Sans */
+  .dm .big-num { font-family: 'DM Sans', sans-serif; font-size: 44px; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -0.02em; }
+  .dm .label { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; color: rgba(0,229,255,0.4); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 4px; }
+  .dm .body { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 400; color: #ccc; margin-top: 14px; }
+  .dm .pr { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; background: #ff6b00; color: #fff; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 8px; text-transform: uppercase; }
+
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<h1>Ghost Rival — Typography Direction · Choose one</h1>
+<div class="grid">
+
+  <div class="card bc">
+    <div class="tag">Option 1</div>
+    <div class="type-name">Barlow Condensed — Sport Aggressive</div>
+    <div class="big-num">82.5kg</div>
+    <div class="label">× 5 reps · Bench Press</div>
+    <div class="divider"></div>
+    <div class="body">Ghost: 80kg × 5 — +2.5kg ahead</div>
+    <div class="pr">New PR</div>
+  </div>
+
+  <div class="card inter">
+    <div class="tag">Option 2</div>
+    <div class="type-name">Inter — Clean Precision</div>
+    <div class="big-num">82.5kg</div>
+    <div class="label">× 5 reps · Bench Press</div>
+    <div class="divider"></div>
+    <div class="body">Ghost: 80kg × 5 — +2.5kg ahead</div>
+    <div class="pr">New PR</div>
+  </div>
+
+  <div class="card raj">
+    <div class="tag">Option 3</div>
+    <div class="type-name">Rajdhani — Tactical HUD</div>
+    <div class="big-num">82.5kg</div>
+    <div class="label">× 5 reps · Bench Press</div>
+    <div class="divider"></div>
+    <div class="body">Ghost: 80kg × 5 — +2.5kg ahead</div>
+    <div class="pr">New PR</div>
+  </div>
+
+  <div class="card dm">
+    <div class="tag">Option 4</div>
+    <div class="type-name">DM Sans — Warm Modern</div>
+    <div class="big-num">82.5kg</div>
+    <div class="label">× 5 reps · Bench Press</div>
+    <div class="divider"></div>
+    <div class="body">Ghost: 80kg × 5 — +2.5kg ahead</div>
+    <div class="pr">New PR</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>UX Design Validation: Ghost Rival</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+    --verdict-strong: #16a34a;
+    --verdict-adequate: #65a30d;
+    --verdict-thin: #d97706;
+    --verdict-broken: #dc2626;
+    --sev-low: #64748b;
+    --sev-medium: #ca8a04;
+    --sev-high: #ea580c;
+    --sev-critical: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; font-size: 15px; }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+  header.report-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .synthesis { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--muted); border-radius: 8px; padding: 18px 22px; margin-bottom: 24px; font-size: 15.5px; }
+  .synthesis p { margin: 0 0 10px; }
+  .synthesis p:last-child { margin-bottom: 0; }
+  .dimension-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 24px; }
+  .dim-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .dim-card .dim-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .dim-card .dim-verdict { font-size: 14px; font-weight: 600; }
+  section.dimension, section.reviewer-section { margin-bottom: 14px; }
+  section.dimension details, section.reviewer-section details { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  section summary { padding: 14px 20px; cursor: pointer; user-select: none; list-style: none; display: flex; align-items: center; gap: 12px; }
+  section summary::-webkit-details-marker { display: none; }
+  section summary::before { content: "▸"; display: inline-block; color: var(--muted); transition: transform 0.15s ease; }
+  section details[open] summary::before { transform: rotate(90deg); }
+  section summary h2 { display: inline; margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.005em; flex: 1; }
+  .verdict-pill { font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: white; }
+  .verdict-strong { background: var(--verdict-strong); }
+  .verdict-adequate { background: var(--verdict-adequate); }
+  .verdict-thin { background: var(--verdict-thin); }
+  .verdict-broken { background: var(--verdict-broken); }
+  .dim-body { padding: 4px 20px 18px; }
+  .dim-judgment { color: var(--text); font-size: 14.5px; }
+  .dim-judgment p { margin: 0 0 10px; }
+  .findings-list { padding: 0 20px 4px; }
+  article.finding { padding: 14px 0; border-top: 1px solid var(--border); }
+  article.finding:first-child { border-top: none; }
+  article.finding header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+  .badge { font-size: 10.5px; padding: 3px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.4; }
+  .badge-sev-low { background: rgba(100,116,139,0.12); color: var(--sev-low); }
+  .badge-sev-medium { background: rgba(202,138,4,0.14); color: var(--sev-medium); }
+  .badge-sev-high { background: rgba(234,88,12,0.14); color: var(--sev-high); }
+  .badge-sev-critical { background: rgba(220,38,38,0.14); color: var(--sev-critical); }
+  .finding-title { margin: 0; font-size: 15px; font-weight: 500; flex: 1; min-width: 200px; }
+  .finding-location { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--muted); }
+  .finding-note, .finding-fix { margin-top: 6px; font-size: 14px; }
+  .finding-fix strong { color: var(--muted); font-weight: 500; }
+  .reviewer-source { font-size: 12px; color: var(--muted); font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .mechanical { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-top: 24px; font-size: 14px; }
+  .mechanical h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mechanical ul { margin: 0; padding-left: 20px; }
+  .mechanical li { margin-bottom: 4px; }
+  footer.report-footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  footer .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+  .counts { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0 4px; }
+  .count-chip { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+  .count-critical { background: rgba(220,38,38,0.12); color: var(--sev-critical); }
+  .count-high { background: rgba(234,88,12,0.12); color: var(--sev-high); }
+  .count-medium { background: rgba(202,138,4,0.12); color: var(--sev-medium); }
+  .count-low { background: rgba(100,116,139,0.12); color: var(--sev-low); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="report-header">
+    <div class="title">
+      <h1>Ghost Rival — UX Design Validation Report</h1>
+      <div class="subtitle">ux-test-project-2026-06-19 · 2026-06-19 · 4 reviewers</div>
+    </div>
+  </header>
+
+  <div class="synthesis">
+    <p>The spine pair is mechanically sound and ready for architecture on the main implementation path. The token system is clean with zero broken cross-references; all 4 user journeys are present with named protagonists and climax beats; PRD vocabulary is inherited correctly throughout. The rubric walker found no critical issues — Flow coverage, Token completeness, Bloat, Inheritance discipline, and Shape fit are all strong.</p>
+    <p>The adversarial and accessibility reviewers together surface a single dominant concern: <strong>Ghost Rival's core visual mechanic (<code>ghost-dim</code> at 30% opacity) and its dark-only identity create real legibility and accessibility problems in the product's primary use environment — the gym.</strong> This is not cosmetic; it undermines the Ghost comparison feature the product is built around. Three critical findings from these reviewers will require spine updates before key-screen mocks or story-dev begins.</p>
+    <p>The edge-case hunter found 7 critical unhandled cases. Most cause silent data corruption rather than visible crashes: phantom PRs after set deletion, PR loss at force-close, Ghost self-referencing the current session, unit mismatch on draft resume. These need to be captured as explicit behavioral requirements in the architecture phase.</p>
+    <div class="counts">
+      <span class="count-chip count-critical">14 critical</span>
+      <span class="count-chip count-high">19 high</span>
+      <span class="count-chip count-medium">27 medium</span>
+      <span class="count-chip count-low">24 low</span>
+    </div>
+  </div>
+
+  <div class="dimension-summary">
+    <div class="dim-card"><div class="dim-name">Flow coverage</div><div class="dim-verdict" style="color:var(--verdict-strong)">Strong</div></div>
+    <div class="dim-card"><div class="dim-name">Token completeness</div><div class="dim-verdict" style="color:var(--verdict-adequate)">Adequate</div></div>
+    <div class="dim-card"><div class="dim-name">Component coverage</div><div class="dim-verdict" style="color:var(--verdict-adequate)">Adequate</div></div>
+    <div class="dim-card"><div class="dim-name">State coverage</div><div class="dim-verdict" style="color:var(--verdict-adequate)">Adequate</div></div>
+    <div class="dim-card"><div class="dim-name">Visual ref coverage</div><div class="dim-verdict" style="color:var(--verdict-adequate)">Adequate</div></div>
+    <div class="dim-card"><div class="dim-name">Bloat</div><div class="dim-verdict" style="color:var(--verdict-strong)">Strong</div></div>
+    <div class="dim-card"><div class="dim-name">Inheritance discipline</div><div class="dim-verdict" style="color:var(--verdict-strong)">Strong</div></div>
+    <div class="dim-card"><div class="dim-name">Shape fit</div><div class="dim-verdict" style="color:var(--verdict-strong)">Strong</div></div>
+  </div>
+
+  <!-- 1. Flow coverage -->
+  <section class="dimension">
+    <details>
+      <summary><h2>1. Flow coverage</h2><span class="verdict-pill verdict-strong">Strong</span></summary>
+      <div class="dim-body"><div class="dim-judgment"><p>All 4 UJs (UJ-1 through UJ-4) present in EXPERIENCE.md Key Flows with named protagonist Kenji, numbered steps, climax beats, and failure paths. UJ-1 includes draft-recovery edge case. UJ-3 includes silent-device edge case.</p></div></div>
+      <div class="findings-list">
+        <article class="finding">
+          <header><span class="badge badge-sev-medium">Medium</span><h3 class="finding-title">Ghost Type Selector flow (UJ-4) references unspecced bottom-sheet</h3><span class="finding-location">EXPERIENCE.md Key Flows §4</span></header>
+          <div class="finding-note">UJ-4 Step 4 implies a bottom-sheet interaction. Developer has no behavioral contract.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Add <code>ghost-type-selector</code> component spec to Component Patterns and IA.</div>
+        </article>
+      </div>
+    </details>
+  </section>
+
+  <!-- 2. Token completeness -->
+  <section class="dimension">
+    <details open>
+      <summary><h2>2. Token completeness</h2><span class="verdict-pill verdict-adequate">Adequate</span></summary>
+      <div class="dim-body"><div class="dim-judgment"><p>All 10 color tokens defined with hex values. All 5 typography scales defined. Zero broken <code>{colors.*}</code> or <code>{typography.*}</code> references. One critical gap: no error/validation color exists.</p></div></div>
+      <div class="findings-list">
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">No error/validation color token</h3><span class="finding-location">DESIGN.md Colors</span></header>
+          <div class="finding-note"><code>pr-burst</code> is reserved for PRs only. Exercise Creator, weight/reps validation, and duplicate name errors (FR-1) have no error color to use.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Add <code>feedback-error: '#ff4444'</code> to DESIGN.md frontmatter, scoped to form validation only.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-medium">Medium</span><h3 class="finding-title"><code>ghost-accent</code> contrast ratio stated incorrectly</h3><span class="finding-location">EXPERIENCE.md Accessibility Floor</span></header>
+          <div class="finding-note">Stated as 7.2:1; actual computed ratio is ≈9.6:1 on <code>surface-raised</code>. Not a failure but the stated value is wrong.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Correct the ratio in the Accessibility Floor section.</div>
+        </article>
+      </div>
+    </details>
+  </section>
+
+  <!-- 3. Component coverage -->
+  <section class="dimension">
+    <details open>
+      <summary><h2>3. Component coverage</h2><span class="verdict-pill verdict-adequate">Adequate</span></summary>
+      <div class="dim-body"><div class="dim-judgment"><p>All 12 named components have rows in both spines. Two additional components referenced in prose/flows have no spec. Three more have partial specs only.</p></div></div>
+      <div class="findings-list">
+        <article class="finding">
+          <header><span class="badge badge-sev-high">High</span><h3 class="finding-title"><code>gym-streak-widget</code> has no spec in either spine</h3><span class="finding-location">EXPERIENCE.md IA, Key Flows §1</span></header>
+          <div class="finding-note">Referenced on Home tab and in Session Summary. Blocks Home tab architecture and story-dev.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Add to both spines. Minimum: layout position, Streak count display token, Mercy Day indicator, milestone notification trigger.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-high">High</span><h3 class="finding-title"><code>ghost-type-selector</code> has no spec in either spine</h3><span class="finding-location">EXPERIENCE.md IA §Ghost Type Selector</span></header>
+          <div class="finding-note">Referenced in IA surface map and UJ-4. Blocks UJ-4 story-dev.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Add to both spines: bottom-sheet trigger, 3 options, selection state, supplementary Ghost data per option.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-medium">Medium</span><h3 class="finding-title"><code>session-end-confirmation</code>, <code>exercise-creator</code>, <code>draft-resume-prompt</code> missing component specs</h3><span class="finding-location">EXPERIENCE.md IA surface map</span></header>
+          <div class="finding-note">All three are in the IA surface map but not in Component Patterns. <code>exercise-creator</code> also missing validation error state.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Add a row for each in Component Patterns. Add validation error state to <code>exercise-creator</code> using <code>feedback-error</code> token.</div>
+        </article>
+      </div>
+    </details>
+  </section>
+
+  <!-- 4. State coverage -->
+  <section class="dimension">
+    <details>
+      <summary><h2>4. State coverage</h2><span class="verdict-pill verdict-adequate">Adequate</span></summary>
+      <div class="dim-body"><div class="dim-judgment"><p>Main session and home states are well covered. Several surfaces missing edge states that will hit users in week 1.</p></div></div>
+      <div class="findings-list">
+        <article class="finding">
+          <header><span class="badge badge-sev-medium">Medium</span><h3 class="finding-title">Hall of Fame: per-exercise view state unspecced</h3><span class="finding-location">EXPERIENCE.md IA §Hall of Fame</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> Spec "no PRs for this exercise yet" state, or clarify list is global with no per-exercise filter in MVP.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-medium">Medium</span><h3 class="finding-title">Session screen: "0 exercises added" empty state missing</h3><span class="finding-location">EXPERIENCE.md State Patterns</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> Add: instruction copy + prominent "Add Exercise" CTA on empty session screen.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-low">Low</span><h3 class="finding-title">Home tab: "session active in background" FAB state unspecced</h3><span class="finding-location">EXPERIENCE.md State Patterns</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> Add state: FAB replaced by "Resume Session" button in <code>ghost-accent</code>.</div>
+        </article>
+      </div>
+    </details>
+  </section>
+
+  <!-- 5. Visual reference coverage -->
+  <section class="dimension">
+    <details>
+      <summary><h2>5. Visual reference coverage</h2><span class="verdict-pill verdict-adequate">Adequate</span></summary>
+      <div class="dim-body"><div class="dim-judgment"><p>No <code>mockups/</code> or <code>wireframes/</code> directory yet — pending key-screen mock step in Finalize. Spines correctly note "→ mockup pending." Creative artifacts in <code>.working/</code> are decision artifacts, not final mockups.</p></div></div>
+    </details>
+  </section>
+
+  <!-- 6. Bloat -->
+  <section class="dimension">
+    <details>
+      <summary><h2>6. Bloat &amp; overspecification</h2><span class="verdict-pill verdict-strong">Strong</span></summary>
+      <div class="dim-body"><div class="dim-judgment"><p>DESIGN.md prose carries editorial voice without restating PRD content. EXPERIENCE.md uses tables throughout. No pixel specs outside of spacing tokens. No persona restatement. Two minor items.</p></div></div>
+      <div class="findings-list">
+        <article class="finding">
+          <header><span class="badge badge-sev-low">Low</span><h3 class="finding-title">Cardio Ghost comparison nearly verbatim from PRD assumption</h3><span class="finding-location">EXPERIENCE.md Ghost Comparison Patterns §Cardio</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> State as a committed UX decision, not an inherited PRD assumption.</div>
+        </article>
+      </div>
+    </details>
+  </section>
+
+  <!-- 7. Inheritance discipline -->
+  <section class="dimension">
+    <details>
+      <summary><h2>7. Inheritance discipline</h2><span class="verdict-pill verdict-strong">Strong</span></summary>
+      <div class="dim-body"><div class="dim-judgment"><p>All PRD glossary terms used verbatim. UJ names (UJ-1 through UJ-4) referenced correctly. Protagonist name (Kenji) consistent. One naming convention note needed.</p></div></div>
+      <div class="findings-list">
+        <article class="finding">
+          <header><span class="badge badge-sev-medium">Medium</span><h3 class="finding-title">Frontmatter kebab-case vs prose Title Case convention unstated</h3><span class="finding-location">DESIGN.md frontmatter, EXPERIENCE.md Component Patterns</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> Add a note in DESIGN.md frontmatter: "Component names in prose use Title Case; frontmatter list uses kebab-case identifiers."</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-low">Low</span><h3 class="finding-title">"Dismiss" vs "Continue" used interchangeably in PR Explosion Sequence</h3><span class="finding-location">EXPERIENCE.md PR Explosion Sequence</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> Pick one term and use it throughout the sequence spec.</div>
+        </article>
+      </div>
+    </details>
+  </section>
+
+  <!-- 8. Shape fit -->
+  <section class="dimension">
+    <details>
+      <summary><h2>8. Shape fit</h2><span class="verdict-pill verdict-strong">Strong</span></summary>
+      <div class="dim-body"><div class="dim-judgment"><p>DESIGN.md sections in canonical order. All EXPERIENCE.md required sections present. Invented sections (Session Lifecycle, Ghost Comparison Patterns, PR Explosion Sequence, Floating Bubble &amp; Live Activity, Offline-First) earn their place. Inspiration &amp; Anti-patterns and Responsive &amp; Platform correctly triggered.</p></div></div>
+    </details>
+  </section>
+
+  <!-- Adversarial reviewer -->
+  <section class="reviewer-section">
+    <details open>
+      <summary><h2>Adversarial Review</h2><span class="reviewer-source">review-adversarial.md · 4C / 4H / 4M / 4L</span></summary>
+      <div class="dim-body"><div class="dim-judgment"><p>The spec is visually coherent and unusually mature on accessibility and platform deltas, but has critical implementation gaps. The "invisible until it matters" philosophy breaks down in real gym lighting, and the Infinite Goal Engine — the product's key differentiator after Ghost Rival itself — is named but never algorithmically specified.</p></div></div>
+      <div class="findings-list">
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title"><code>ghost-dim</code> 30% opacity unreadable under gym lighting</h3><span class="finding-location">DESIGN.md Colors §ghost-dim rationale</span></header>
+          <div class="finding-note">Calibrated on a design monitor. Under fluorescent gym overheads, low-opacity text loses perceptible contrast faster than the ratio math suggests. The Ghost comparison mechanic becomes invisible precisely when it matters most.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Test in an actual gym. Likely needs 40–45% opacity. Consider making High Contrast mode the default and the subdued version opt-in.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">No light mode is an operational liability for gym/outdoor use</h3><span class="finding-location">DESIGN.md Brand & Style</span></header>
+          <div class="finding-note">Bright overhead lighting produces glare on dark screens from pupil constriction. No Settings fallback. The brand stance survives a pitch deck but not a parking-lot workout.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Add "Bright Environment Mode" in Settings — raises surface levels ~30% luminance, preserves all color semantics. Not a light mode; a legibility accommodation.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">Session lockout has no escape valve for mid-session Hall of Fame reference</h3><span class="finding-location">EXPERIENCE.md Navigation rules</span></header>
+          <div class="finding-note">Exercises are added mid-session. Users who add an exercise spontaneously cannot reference past lifts without ending the session. The spec assumes pre-session Ghost review that the flow doesn't facilitate.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Add read-only Hall of Fame slide-in panel accessible from within session, OR add a "Review Ghosts" step to the session start flow.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">Infinite Goal Engine algorithm entirely unspecified</h3><span class="finding-location">EXPERIENCE.md PR Explosion Sequence §Step 9</span></header>
+          <div class="finding-note">Named and featured throughout both spines. No formula, no input signals, no rounding rules, no edge cases, no display format spec. A developer cannot implement this.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Add "Infinite Goal Engine" section to EXPERIENCE.md: input signals, calculation logic, rounding, display format ("Next target: 105kg × 4 — est. [date]"), edge cases.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-high">High</span><h3 class="finding-title">Tab bar uses <code>ghost-accent</code> for active state, violating cyan exclusivity rule</h3><span class="finding-location">DESIGN.md Brand & Style, Components §Tab Bar</span></header>
+          <div class="finding-note">DESIGN.md Brand & Style: "Cyan is reserved for one thing: Ghost data." Active tab indicator in cyan directly violates this rule.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Use <code>ink-primary</code> (white) for active tab state; <code>ink-secondary</code> for inactive.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-high">High</span><h3 class="finding-title">Set pre-fill hierarchy contradicts PRD</h3><span class="finding-location">EXPERIENCE.md Component Patterns §Set Row; PRD §4.2</span></header>
+          <div class="finding-note">PRD: "First Set pre-fills from Ghost data." EXPERIENCE.md: "Pre-fills from previous set within session." Conflict on Set 1. Developer will implement one and be right 50% of the time.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Define explicit hierarchy: (1) previous Set within session; (2) Ghost data (Set 1); (3) blank (Set 1, no Ghost).</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-high">High</span><h3 class="finding-title">Gym Streak mechanic never explained; first reset will feel like a bug</h3><span class="finding-location">EXPERIENCE.md State Patterns, Home tab</span></header>
+          <div class="finding-note">Weekly cadence, reset rules, and Mercy Day interaction are invisible to users. The streak widget shows a number with no context.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Add tooltip spec for Streak widget first interaction. Add State Pattern for streak reset moment with specific copy.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-high">High</span><h3 class="finding-title">Draft recovery: no "Save as Complete" path</h3><span class="finding-location">EXPERIENCE.md Session Lifecycle §Phase 5</span></header>
+          <div class="finding-note">Users returning hours after a force-close must choose between Resume (reopening) or Discard (losing data). No middle path for "save what was logged."</div>
+          <div class="finding-fix"><strong>Fix:</strong> Add "Save as Complete" as a third CTA; make it primary when draft is older than 2 hours.</div>
+        </article>
+      </div>
+    </details>
+  </section>
+
+  <!-- Edge-case reviewer -->
+  <section class="reviewer-section">
+    <details open>
+      <summary><h2>Edge-Case Review</h2><span class="reviewer-source">review-edge-cases.md · 57 cases · 7C / 7H / 10M / 4L</span></summary>
+      <div class="dim-body"><div class="dim-judgment"><p>57 cases examined across 7 categories. 10 fully handled, 11 partial, 36 gaps. 7 critical unhandled cases — most cause silent data corruption rather than visible crashes. These are engineering requirements, not UX copy issues.</p></div></div>
+      <div class="findings-list">
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">Swipe-to-delete post-PR within 30s window: phantom Hall of Fame entry, no rollback</h3><span class="finding-location">EXPERIENCE.md Component Patterns §Set Row; PR Explosion Sequence</span></header>
+          <div class="finding-note">Hall of Fame is written at PR detection time. Deleting the triggering set within 30s does not retract the entry. Ghost benchmark is corrupted permanently.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Spec rollback: if PR-triggering set is deleted within 30s, retract the Hall of Fame entry and restore the previous Ghost.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">PR at exact app force-close: PR silently lost</h3><span class="finding-location">EXPERIENCE.md Session Lifecycle §Phase 5</span></header>
+          <div class="finding-note">Draft recovery restores the session but does not re-run PR detection on recovered sets. The PR is lost with no indication to the user.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Spec that draft recovery re-evaluates all recovered sets for PR detection and fires retroactive PR Explosion if applicable.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">Stale PR after multi-device sync: phantom PRs accumulate permanently</h3><span class="finding-location">EXPERIENCE.md Offline-First Behavior §Conflict resolution</span></header>
+          <div class="finding-note">PR celebrated on Device A against stale Ghost. After syncing Device B's newer data, the "PR" may not be valid. No re-evaluation or retraction mechanism.</div>
+          <div class="finding-fix"><strong>Fix:</strong> After sync, re-evaluate Hall of Fame entries against the merged dataset. Flag or retract entries that no longer qualify.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">Ghost referencing in-progress session: "Last Session" self-references current session</h3><span class="finding-location">EXPERIENCE.md Ghost Comparison Patterns</span></header>
+          <div class="finding-note">On first set of a new exercise in the current session, "Last Session" Ghost type would reference that same set, violating the invariant that Ghosts are always from past sessions.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Ghost candidates exclude the current session_id. "Last Session" = most recently <em>completed</em> session.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">Draft resume after unit change: stored weights in wrong unit</h3><span class="finding-location">EXPERIENCE.md Session Lifecycle §Phase 5</span></header>
+          <div class="finding-note">Draft weights stored in original unit. No conversion spec on resume after unit change.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Store all weights internally in canonical unit (kg). Unit preference is display-only, never a data transformation.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">0-set session end: undefined Summary, potential 0-value Ghost</h3><span class="finding-location">EXPERIENCE.md Session Lifecycle §Phase 4</span></header>
+          <div class="finding-note">A 0-value Ghost would corrupt all future comparisons for that exercise.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Block "End Workout" confirmation with 0 sets logged ("No sets logged — are you sure?") or discard 0-set sessions entirely without creating a Ghost.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">SYSTEM_ALERT_WINDOW revoked mid-session: Bubble disappears, no auto-fallback</h3><span class="finding-location">EXPERIENCE.md Floating Bubble &amp; Live Activity §Android</span></header>
+          <div class="finding-note">Notification fallback may not auto-activate on permission revocation. User loses the entire logging UX mid-session.</div>
+          <div class="finding-fix"><strong>Fix:</strong> On revocation event, immediately promote to persistent notification fallback. Surface one-time toast: "Overlay permission removed — logging via notification instead."</div>
+        </article>
+      </div>
+    </details>
+  </section>
+
+  <!-- Accessibility reviewer -->
+  <section class="reviewer-section">
+    <details open>
+      <summary><h2>Accessibility Review</h2><span class="reviewer-source">review-accessibility.md · 3C / 5H / 6M / 5L</span></summary>
+      <div class="dim-body"><div class="dim-judgment"><p>Ghost Rival's accessibility floor is more deliberate than most fitness apps: Reduced Motion, High Contrast Ghost mode, VoiceOver/TalkBack labels, and Dynamic Type reflow are all meaningfully specified. The critical gaps are the cost of two deliberate product decisions (dark-only identity, <code>ghost-dim</code> at 30% opacity) that were never fully reconciled with the accessibility guarantees those decisions undercut.</p></div></div>
+      <div class="findings-list">
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">Rest timer zero: no persistent signal for deaf-blind users or users in another app</h3><span class="finding-location">EXPERIENCE.md Interaction Primitives §Haptic; Floating Bubble spec</span></header>
+          <div class="finding-note">Haptic + Bubble pulse are instantaneous and non-repeating. WCAG 1.3.3 (Sensory Characteristics). No persistent indicator when user is in another app — exactly the designed use case.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Repeating haptic (2–3 cycles). Bubble sub-label persists as "Ready" until next set logged. Screen-reader live announcement pushed to foreground app.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title"><code>ghost-dim</code> below WCAG AA; High Contrast Ghost not auto-triggered by system Increase Contrast flag</h3><span class="finding-location">DESIGN.md Colors §ghost-dim; EXPERIENCE.md Accessibility Floor</span></header>
+          <div class="finding-note">WCAG 1.4.3. Low-vision users who express accessibility needs via system flags still encounter illegible Ghost data — the core mechanic — with no automatic remedy.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Read <code>UIAccessibilityIsReduceTransparencyEnabled</code> (iOS) / <code>isHighTextContrastEnabled</code> (Android). Auto-apply High Contrast Ghost when either flag is active.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-critical">Critical</span><h3 class="finding-title">No light mode; no Smart Invert compatibility specified</h3><span class="finding-location">DESIGN.md Brand & Style</span></header>
+          <div class="finding-note">WCAG 1.4.3, 1.4.11. Smart Invert without <code>accessibilityIgnoresInvertColors</code> will invert ghost-dim cyan to dark orange-red, destroying the Ghost/PR color semantics.</div>
+          <div class="finding-fix"><strong>Fix:</strong> Mark Ghost icons, PR Explosion rings, particles, ghost-dim text, ghost-accent indicators, and pr-burst elements with <code>accessibilityIgnoresInvertColors = true</code> on iOS. Document for implementation team.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-high">High</span><h3 class="finding-title">PR Explosion focus management unspecified for screen readers</h3><span class="finding-location">EXPERIENCE.md PR Explosion Sequence</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> Set <code>accessibilityViewIsModal = true</code>. Define traversal order. Return focus to triggering Set Row on dismiss.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-high">High</span><h3 class="finding-title">Ghost Type Selector: selection state not communicated to screen readers</h3><span class="finding-location">EXPERIENCE.md Component Patterns §Ghost Type Selector</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> <code>accessibilityRole="radio"</code>, <code>accessibilityState={{ checked: isSelected }}</code>. Full label per option including supplementary Ghost data.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-high">High</span><h3 class="finding-title">30s Set Row edit window insufficient for screen reader users</h3><span class="finding-location">EXPERIENCE.md Component Patterns §Set Row</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> Extend to 90s when VoiceOver / TalkBack is active.</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-high">High</span><h3 class="finding-title">Swipe-to-delete Set Row has no screen reader equivalent</h3><span class="finding-location">EXPERIENCE.md Interaction Primitives</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> Implement "Delete" custom action via <code>accessibilityActions</code> (React Native).</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-medium">Medium</span><h3 class="finding-title">"No ghost yet" placeholder uses <code>ink-disabled</code> (1.5:1) for meaningful informational text</h3><span class="finding-location">EXPERIENCE.md State Patterns §Ghost Row</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> Render in <code>ink-secondary</code> (4.6:1 on surface-raised).</div>
+        </article>
+        <article class="finding">
+          <header><span class="badge badge-sev-medium">Medium</span><h3 class="finding-title">PR Explosion "Previous ghost" line uses <code>ghost-dim</code> (sub-AA) for comparative data</h3><span class="finding-location">DESIGN.md Components §pr-explosion-overlay</span></header>
+          <div class="finding-fix"><strong>Fix:</strong> On PR Explosion NEW RECORD card specifically, render previous value in <code>ghost-accent</code> at full opacity (≈9.6:1).</div>
+        </article>
+      </div>
+    </details>
+  </section>
+
+  <div class="mechanical">
+    <h3>Mechanical notes</h3>
+    <ul>
+      <li>EXPERIENCE.md <code>sources</code> frontmatter uses relative path patterns — not absolute paths. Acceptable for spine tracking.</li>
+      <li>Frontmatter component list uses kebab-case slugs; prose uses Title Case. Convention should be stated once in DESIGN.md frontmatter comment.</li>
+      <li>"Dismiss" and "Continue" used interchangeably in PR Explosion Sequence — pick one.</li>
+      <li>No Mermaid diagrams present — not required for this product.</li>
+      <li>Both files' <code>status</code> fields read <code>final</code>. Correct.</li>
+    </ul>
+  </div>
+
+  <footer class="report-footer">
+    <div class="meta">
+      <span>DESIGN.md: ux-test-project-2026-06-19/DESIGN.md</span>
+      <span>EXPERIENCE.md: ux-test-project-2026-06-19/EXPERIENCE.md</span>
+      <span>Generated: 2026-06-19</span>
+      <span>Reviewers: rubric · adversarial · edge-cases · accessibility</span>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

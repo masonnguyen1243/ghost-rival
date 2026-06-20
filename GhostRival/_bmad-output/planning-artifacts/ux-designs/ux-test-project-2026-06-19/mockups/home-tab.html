@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Rival — Home Tab</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 32px 0 32px;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  .phone {
+    width: 390px;
+    min-height: 844px;
+    background: #0d0d0f;
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.06);
+  }
+  .status-bar {
+    height: 50px;
+    background: #0d0d0f;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px 0;
+  }
+  .status-time { font-size: 15px; font-weight: 600; color: #ffffff; }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .status-icons span { font-size: 13px; color: #ffffff; }
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+  }
+  .app-title {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8888a0;
+  }
+  .streak-mini {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #141418;
+    border-radius: 20px;
+    padding: 6px 12px;
+  }
+  .streak-mini .flame { font-size: 16px; }
+  .streak-mini .count { font-size: 15px; font-weight: 700; color: #ffffff; }
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px 100px;
+  }
+  .streak-widget {
+    background: #141418;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid #1e1e28;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .streak-left {}
+  .streak-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8888a0;
+    margin-bottom: 4px;
+  }
+  .streak-number {
+    font-size: 40px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .streak-sub {
+    font-size: 12px;
+    font-weight: 400;
+    color: #8888a0;
+    margin-top: 4px;
+  }
+  .streak-flame-big {
+    font-size: 44px;
+    opacity: 0.9;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(0,229,255,0.5);
+    padding: 4px 4px 8px;
+  }
+  .ghost-row {
+    background: #141418;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 10px;
+    border: 1px solid #1e1e28;
+  }
+  .ghost-row-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .exercise-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+  .ghost-badge {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #00e5ff;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 6px;
+    padding: 3px 8px;
+  }
+  .ghost-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: rgba(0,229,255,0.40);
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .ghost-narrative {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(0,229,255,0.35);
+    margin-bottom: 10px;
+  }
+  .goal-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #ff6b00;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #ff6b00;
+    letter-spacing: 0.02em;
+  }
+  .goal-chip-arrow { font-size: 10px; }
+  .fab-container {
+    position: absolute;
+    bottom: 74px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .fab {
+    width: 200px;
+    height: 52px;
+    background: #ff6b00;
+    border-radius: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 8px 24px rgba(255,107,0,0.35);
+    pointer-events: all;
+  }
+  .fab-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+  }
+  .tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    background: #141418;
+    border-top: 1px solid #1e1e28;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 10px;
+  }
+  .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .tab-icon { font-size: 22px; }
+  .tab-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .tab.active .tab-label { color: #ffffff; }
+  .tab.inactive .tab-label { color: #8888a0; }
+  .tab.inactive .tab-icon { opacity: 0.4; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <span>●●●</span>
+      <span>WiFi</span>
+      <span>🔋</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <span class="app-title">Ghost Rival</span>
+    <div class="streak-mini">
+      <span class="flame">🔥</span>
+      <span class="count">12</span>
+    </div>
+  </div>
+
+  <!-- Scrollable content -->
+  <div class="scroll-area">
+
+    <!-- Gym Streak Widget -->
+    <div class="streak-widget">
+      <div class="streak-left">
+        <div class="streak-label">Gym Streak</div>
+        <div class="streak-number">12</div>
+        <div class="streak-sub">weeks · Mercy Day available</div>
+      </div>
+      <div class="streak-flame-big">🔥</div>
+    </div>
+
+    <!-- Ghost lineup -->
+    <div class="section-label">Your Ghosts</div>
+
+    <!-- Ghost Row 1: Bench Press -->
+    <div class="ghost-row">
+      <div class="ghost-row-header">
+        <span class="exercise-name">Bench Press</span>
+        <span class="ghost-badge">All-Time PR</span>
+      </div>
+      <div class="ghost-value">82.5 kg × 3</div>
+      <div class="ghost-narrative">your best ever</div>
+      <div class="goal-chip">
+        <span class="goal-chip-arrow">→</span>
+        Next target: 85 kg
+      </div>
+    </div>
+
+    <!-- Ghost Row 2: Squat -->
+    <div class="ghost-row">
+      <div class="ghost-row-header">
+        <span class="exercise-name">Squat</span>
+        <span class="ghost-badge">Last Week</span>
+      </div>
+      <div class="ghost-value">102.5 kg × 4</div>
+      <div class="ghost-narrative">you from last Tuesday</div>
+    </div>
+
+    <!-- Ghost Row 3: Deadlift -->
+    <div class="ghost-row">
+      <div class="ghost-row-header">
+        <span class="exercise-name">Deadlift</span>
+        <span class="ghost-badge">Last Month</span>
+      </div>
+      <div class="ghost-value">140 kg × 1</div>
+      <div class="ghost-narrative">you from 3 weeks ago</div>
+    </div>
+
+  </div>
+
+  <!-- FAB -->
+  <div class="fab-container">
+    <div class="fab">
+      <span style="font-size:20px;color:#fff;">＋</span>
+      <span class="fab-label">Start Workout</span>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab active">
+      <span class="tab-icon">👻</span>
+      <span class="tab-label">Home</span>
+    </div>
+    <div class="tab inactive">
+      <span class="tab-icon">🏆</span>
+      <span class="tab-label">Hall of Fame</span>
+    </div>
+    <div class="tab inactive">
+      <span class="tab-icon">⚙️</span>
+      <span class="tab-label">Settings</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

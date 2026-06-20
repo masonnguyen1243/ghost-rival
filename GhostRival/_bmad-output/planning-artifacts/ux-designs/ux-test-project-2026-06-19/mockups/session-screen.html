@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Rival — Session Screen</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 32px 0 32px;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  .phone {
+    width: 390px;
+    min-height: 844px;
+    background: #0d0d0f;
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.06);
+  }
+  .status-bar {
+    height: 50px;
+    background: #0d0d0f;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px 0;
+  }
+  .status-time { font-size: 15px; font-weight: 600; color: #ffffff; }
+  .status-icons { font-size: 13px; color: #ffffff; display: flex; gap: 6px; }
+
+  .session-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px 8px;
+    border-bottom: 1px solid #1e1e28;
+  }
+  .session-exercise-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+  .hof-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #8888a0;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    background: #141418;
+    border: 1px solid #1e1e28;
+    border-radius: 8px;
+    padding: 6px 10px;
+  }
+
+  .ghost-panel {
+    background: #141418;
+    margin: 12px 16px 0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    border: 1px solid rgba(0,229,255,0.12);
+  }
+  .ghost-panel-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(0,229,255,0.45);
+    margin-bottom: 4px;
+  }
+  .ghost-panel-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: rgba(0,229,255,0.40);
+    letter-spacing: -0.02em;
+  }
+  .ghost-panel-narrative {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(0,229,255,0.30);
+    margin-top: 2px;
+  }
+
+  .sets-area {
+    flex: 1;
+    padding: 12px 16px 0;
+    overflow-y: auto;
+  }
+  .sets-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8888a0;
+    margin-bottom: 8px;
+  }
+  .set-row {
+    background: #141418;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border: 1px solid #1e1e28;
+  }
+  .set-row-locked {
+    opacity: 0.7;
+  }
+  .set-row-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .set-number {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8888a0;
+  }
+  .set-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+  }
+  .set-pr-badge {
+    border: 1px solid #ff6b00;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #ff6b00;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .set-delta {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(0,229,255,0.40);
+    margin-top: 4px;
+  }
+
+  .entry-form {
+    background: #1a1a22;
+    margin: 12px 16px 0;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #1e1e28;
+  }
+  .entry-form-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8888a0;
+    margin-bottom: 12px;
+  }
+  .entry-fields {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .entry-field {
+    flex: 1;
+    background: #0d0d0f;
+    border-radius: 10px;
+    border: 1px solid #1e1e28;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .field-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8888a0;
+    margin-bottom: 4px;
+  }
+  .field-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .field-unit {
+    font-size: 12px;
+    font-weight: 500;
+    color: #8888a0;
+    margin-top: 2px;
+  }
+  .prefill-hint {
+    font-size: 11px;
+    font-weight: 400;
+    color: #8888a0;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .log-btn {
+    width: 100%;
+    background: #ff6b00;
+    border-radius: 12px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+    box-shadow: 0 4px 16px rgba(255,107,0,0.25);
+  }
+
+  .bottom-area {
+    padding: 12px 16px 28px;
+  }
+  .end-btn {
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #8888a0;
+  }
+
+  .rest-timer-bar-wrap {
+    position: relative;
+    height: 3px;
+    background: #1e1e28;
+    margin: 10px 16px 0;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .rest-timer-bar-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 62%;
+    background: #00e5ff;
+    border-radius: 2px;
+    transition: width 1s linear;
+  }
+  .rest-timer-label {
+    text-align: right;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(0,229,255,0.6);
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    padding: 4px 16px 0;
+    font-family: 'DM Sans', monospace;
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar">
+    <span class="status-time">9:47</span>
+    <div class="status-icons"><span>●●●</span><span>🔋</span></div>
+  </div>
+
+  <!-- Session header -->
+  <div class="session-header">
+    <span class="session-exercise-name">Bench Press</span>
+    <div class="hof-btn">📋 History</div>
+  </div>
+
+  <!-- Ghost comparison panel -->
+  <div class="ghost-panel">
+    <div class="ghost-panel-label">Ghost · All-Time PR</div>
+    <div class="ghost-panel-value">82.5 kg × 3</div>
+    <div class="ghost-panel-narrative">your best ever</div>
+  </div>
+
+  <!-- Logged sets -->
+  <div class="sets-area">
+    <div class="sets-label">Logged Sets</div>
+
+    <div class="set-row set-row-locked">
+      <div class="set-row-top">
+        <span class="set-number">Set 1</span>
+        <span class="set-value">80 kg × 5</span>
+        <span style="width:48px;"></span>
+      </div>
+      <div class="set-delta">2.5 kg lighter than your best ever</div>
+    </div>
+
+    <div class="set-row set-row-locked">
+      <div class="set-row-top">
+        <span class="set-number">Set 2</span>
+        <span class="set-value">82.5 kg × 5</span>
+        <span class="set-pr-badge">PR</span>
+      </div>
+      <div class="set-delta">2 reps ahead of your best ever</div>
+    </div>
+  </div>
+
+  <!-- Rest timer -->
+  <div class="rest-timer-label">0:56</div>
+  <div class="rest-timer-bar-wrap">
+    <div class="rest-timer-bar-fill"></div>
+  </div>
+
+  <!-- Set entry form -->
+  <div class="entry-form">
+    <div class="entry-form-label">Set 3</div>
+    <div class="entry-fields">
+      <div class="entry-field">
+        <div class="field-label">Weight</div>
+        <div class="field-value">82.5</div>
+        <div class="field-unit">kg</div>
+      </div>
+      <div class="entry-field">
+        <div class="field-label">Reps</div>
+        <div class="field-value">5</div>
+        <div class="field-unit">reps</div>
+      </div>
+    </div>
+    <div class="prefill-hint">Same as last set</div>
+    <div class="log-btn">Log Set</div>
+  </div>
+
+  <!-- End workout -->
+  <div class="bottom-area">
+    <div class="end-btn">End Workout</div>
+  </div>
+</div>
+</body>
+</html>

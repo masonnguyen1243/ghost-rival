@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Rival — PR Explosion</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 32px 0 32px;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  .phone {
+    width: 390px;
+    min-height: 844px;
+    background: #0d0d0f;
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.06);
+  }
+
+  /* Base session content (dimmed behind overlay) */
+  .session-bg {
+    position: absolute;
+    inset: 0;
+    background: #0d0d0f;
+    display: flex;
+    flex-direction: column;
+    padding: 50px 20px 20px;
+    opacity: 0.25;
+    filter: blur(2px);
+  }
+  .bg-exercise { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 12px; }
+  .bg-row { height: 52px; background: #141418; border-radius: 10px; margin-bottom: 8px; }
+
+  /* Full overlay */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Shockwave rings */
+  .rings {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
+  }
+  .ring-1 {
+    width: 340px; height: 340px;
+    border-color: rgba(0,229,255,0.18);
+    box-shadow: 0 0 30px rgba(0,229,255,0.10);
+  }
+  .ring-2 {
+    width: 520px; height: 520px;
+    border-color: rgba(255,107,0,0.12);
+    box-shadow: 0 0 40px rgba(255,107,0,0.08);
+  }
+  .ring-3 {
+    width: 660px; height: 660px;
+    border-color: rgba(255,107,0,0.07);
+  }
+  .ring-inner {
+    width: 160px; height: 160px;
+    border-color: rgba(0,229,255,0.25);
+    box-shadow: 0 0 20px rgba(0,229,255,0.15);
+  }
+
+  /* Particles */
+  .particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    width: 5px;
+    height: 5px;
+  }
+
+  /* Background dim */
+  .dim {
+    position: absolute;
+    inset: 0;
+    background: rgba(13,13,15,0.88);
+  }
+
+  /* Ghost behind card (new ghost materializing) */
+  .ghost-behind {
+    position: absolute;
+    font-size: 44px;
+    font-weight: 800;
+    color: rgba(0,229,255,0.40);
+    letter-spacing: -0.02em;
+    top: 52%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    white-space: nowrap;
+    filter: blur(0.5px);
+  }
+
+  /* The card */
+  .card {
+    position: relative;
+    width: 320px;
+    background: #1a1a22;
+    border-radius: 24px;
+    padding: 32px 28px 28px;
+    text-align: center;
+    box-shadow:
+      0 0 0 1px rgba(255,107,0,0.2),
+      0 0 40px rgba(255,107,0,0.12),
+      0 24px 60px rgba(0,0,0,0.6);
+    z-index: 10;
+  }
+  .new-record-label {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #ff6b00;
+    margin-bottom: 10px;
+  }
+  .record-value {
+    font-size: 56px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .record-unit {
+    font-size: 22px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: -0.01em;
+  }
+  .previous-line {
+    font-size: 14px;
+    font-weight: 400;
+    color: #00e5ff;
+    margin-top: 16px;
+    margin-bottom: 6px;
+  }
+  .hof-line {
+    font-size: 13px;
+    font-weight: 400;
+    color: #8888a0;
+    margin-bottom: 20px;
+  }
+  .goal-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #ff6b00;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #ff6b00;
+    margin-bottom: 24px;
+    letter-spacing: 0.02em;
+  }
+  .continue-btn {
+    width: 100%;
+    border: 1.5px solid rgba(255,255,255,0.35);
+    border-radius: 30px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+  }
+
+  /* Status bar (on top of everything) */
+  .status-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px 0;
+    z-index: 20;
+  }
+  .status-time { font-size: 15px; font-weight: 600; color: #ffffff; }
+  .status-icons { font-size: 13px; color: #ffffff; display: flex; gap: 6px; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Dimmed session content behind -->
+  <div class="session-bg">
+    <div class="bg-exercise">Squat</div>
+    <div class="bg-row"></div>
+    <div class="bg-row"></div>
+    <div class="bg-row"></div>
+  </div>
+
+  <!-- Overlay dim -->
+  <div class="dim"></div>
+
+  <!-- Shockwave rings -->
+  <div class="rings">
+    <div class="ring ring-inner"></div>
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+    <div class="ring ring-3"></div>
+  </div>
+
+  <!-- Particles (cyan) -->
+  <div class="particles">
+    <div class="particle" style="background:rgba(0,229,255,0.7);top:18%;left:22%;"></div>
+    <div class="particle" style="background:rgba(0,229,255,0.5);top:12%;left:55%;width:4px;height:4px;"></div>
+    <div class="particle" style="background:rgba(0,229,255,0.6);top:25%;left:75%;"></div>
+    <div class="particle" style="background:rgba(255,107,0,0.8);top:15%;left:38%;width:6px;height:6px;"></div>
+    <div class="particle" style="background:rgba(255,107,0,0.7);top:30%;left:82%;width:4px;height:4px;"></div>
+    <div class="particle" style="background:rgba(255,107,0,0.6);top:72%;left:16%;"></div>
+    <div class="particle" style="background:rgba(0,229,255,0.5);top:76%;left:70%;width:4px;height:4px;"></div>
+    <div class="particle" style="background:rgba(255,107,0,0.7);top:80%;left:45%;width:6px;height:6px;"></div>
+    <div class="particle" style="background:rgba(0,229,255,0.6);top:78%;left:85%;"></div>
+    <div class="particle" style="background:rgba(255,107,0,0.5);top:8%;left:68%;width:3px;height:3px;"></div>
+    <div class="particle" style="background:rgba(0,229,255,0.4);top:85%;left:30%;width:3px;height:3px;"></div>
+    <div class="particle" style="background:rgba(255,107,0,0.6);top:22%;left:10%;width:5px;height:5px;"></div>
+  </div>
+
+  <!-- Ghost materializing behind card -->
+  <div class="ghost-behind">102.5 × 4</div>
+
+  <!-- Main overlay with card -->
+  <div class="overlay">
+    <div class="card">
+      <div class="new-record-label">New Record</div>
+      <div style="display:flex;align-items:baseline;justify-content:center;gap:8px;">
+        <div class="record-value">102.5</div>
+        <div class="record-unit">kg × 4</div>
+      </div>
+      <div class="previous-line">Previous: 100 kg × 3 — your best ever</div>
+      <div class="hof-line">Saved to Hall of Fame</div>
+      <div class="goal-chip">→ Next target: 105 kg</div>
+      <div class="continue-btn">Continue</div>
+    </div>
+  </div>
+
+  <!-- Status bar on top -->
+  <div class="status-top">
+    <span class="status-time">9:52</span>
+    <div class="status-icons"><span>●●●</span><span>🔋</span></div>
+  </div>
+
+</div>
+</body>
+</html>

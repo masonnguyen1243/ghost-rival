@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX `ghosts_exercise_type_unique` ON `ghosts` (`exercise_id`,`type`);--> statement-breakpoint
+CREATE UNIQUE INDEX `hall_of_fame_exercise_pr_type_unique` ON `hall_of_fame` (`exercise_id`,`pr_type`);

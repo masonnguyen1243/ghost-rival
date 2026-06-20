@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Rival — Floating Bubble (Android)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 32px 0 32px;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  .phone {
+    width: 390px;
+    min-height: 844px;
+    background: #0f0f12;
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.06);
+  }
+
+  /* Android status bar */
+  .status-bar {
+    height: 28px;
+    background: #0f0f12;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px 0;
+  }
+  .status-time { font-size: 12px; font-weight: 600; color: #c0c0c0; }
+  .status-icons { font-size: 12px; color: #c0c0c0; display: flex; gap: 5px; }
+
+  /* Fake Instagram-like app behind */
+  .bg-app {
+    flex: 1;
+    background: #0f0f12;
+    position: relative;
+  }
+  /* Instagram-ish top bar */
+  .ig-header {
+    height: 52px;
+    background: #161618;
+    border-bottom: 1px solid #252528;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    justify-content: space-between;
+  }
+  .ig-logo { font-size: 18px; font-weight: 800; color: #e0e0e0; font-style: italic; }
+  .ig-icons { display: flex; gap: 14px; }
+  .ig-icon { width: 22px; height: 22px; border-radius: 4px; background: #2a2a2e; }
+
+  /* Feed posts (mocked) */
+  .feed {
+    padding: 0;
+  }
+  .post {
+    background: #161618;
+    border-bottom: 1px solid #1e1e22;
+    padding-bottom: 10px;
+    margin-bottom: 2px;
+  }
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+  .post-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #444,#222); }
+  .post-username { width: 80px; height: 10px; background: #2e2e34; border-radius: 5px; }
+  .post-image { width: 100%; height: 180px; background: linear-gradient(160deg, #1e1e24, #16161a, #1c1c20); }
+  .post-actions {
+    display: flex;
+    gap: 14px;
+    padding: 10px 12px 4px;
+  }
+  .action-icon { width: 22px; height: 22px; background: #2a2a2e; border-radius: 4px; }
+  .post-likes { width: 60px; height: 8px; background: #2a2a30; border-radius: 4px; margin: 0 12px; }
+
+  .post2-image { width: 100%; height: 140px; background: linear-gradient(160deg, #1c1c22, #181820, #1e1e24); }
+
+  /* Android nav bar hint */
+  .android-nav {
+    height: 36px;
+    background: #0f0f12;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+  }
+  .nav-btn {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 2px solid #404048;
+  }
+  .nav-btn.circle { border-radius: 50%; }
+  .nav-btn.triangle {
+    border: none;
+    width: 0; height: 0;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    border-right: 14px solid #404048;
+    background: transparent;
+  }
+
+  /* The Floating Bubble */
+  .bubble-wrap {
+    position: absolute;
+    bottom: 100px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .bubble {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #141418;
+    border: 2px solid #00e5ff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 0 0 4px rgba(0,229,255,0.08),
+      0 0 20px rgba(0,229,255,0.25),
+      0 8px 24px rgba(0,0,0,0.5);
+    gap: 1px;
+    position: relative;
+  }
+  /* Glow pulse ring */
+  .bubble::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,229,255,0.2);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.06); }
+  }
+  .bubble-ghost {
+    font-size: 22px;
+    line-height: 1;
+  }
+  .bubble-timer {
+    font-size: 12px;
+    font-weight: 600;
+    color: #00e5ff;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .drag-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .drag-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: rgba(136,136,160,0.5);
+  }
+
+  /* Callout tooltip */
+  .callout {
+    position: absolute;
+    bottom: 136px;
+    right: 96px;
+    background: #1a1a22;
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 12px;
+    padding: 10px 14px;
+    width: 188px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .callout::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    bottom: 18px;
+    width: 0; height: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-left: 8px solid #1a1a22;
+  }
+  .callout-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 3px;
+  }
+  .callout-body {
+    font-size: 11px;
+    font-weight: 400;
+    color: #8888a0;
+    line-height: 1.4;
+  }
+  .callout-action {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(0,229,255,0.8);
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Android status bar -->
+  <div class="status-bar">
+    <span class="status-time">9:47</span>
+    <div class="status-icons"><span>▲ ●●●</span><span>🔋</span></div>
+  </div>
+
+  <!-- Background app (Instagram mock) -->
+  <div class="bg-app">
+    <div class="ig-header">
+      <span class="ig-logo">Instagram</span>
+      <div class="ig-icons">
+        <div class="ig-icon"></div>
+        <div class="ig-icon"></div>
+      </div>
+    </div>
+    <div class="feed">
+      <div class="post">
+        <div class="post-header">
+          <div class="post-avatar"></div>
+          <div class="post-username"></div>
+        </div>
+        <div class="post-image"></div>
+        <div class="post-actions">
+          <div class="action-icon"></div>
+          <div class="action-icon"></div>
+          <div class="action-icon"></div>
+        </div>
+        <div class="post-likes"></div>
+      </div>
+      <div class="post">
+        <div class="post-header">
+          <div class="post-avatar"></div>
+          <div class="post-username"></div>
+        </div>
+        <div class="post2-image"></div>
+        <div class="post-actions">
+          <div class="action-icon"></div>
+          <div class="action-icon"></div>
+        </div>
+        <div class="post-likes"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Android nav -->
+  <div class="android-nav">
+    <div class="nav-btn triangle"></div>
+    <div class="nav-btn circle"></div>
+    <div class="nav-btn"></div>
+  </div>
+
+  <!-- Callout tooltip -->
+  <div class="callout">
+    <div class="callout-title">Rest complete</div>
+    <div class="callout-body">Tap to return and log your next set. Long-press to edit weight first.</div>
+    <div class="callout-action">→ Tap once to log</div>
+  </div>
+
+  <!-- The Floating Bubble -->
+  <div class="bubble-wrap">
+    <div class="bubble">
+      <span class="bubble-ghost">👻</span>
+      <span class="bubble-timer">0:42</span>
+    </div>
+    <div class="drag-dots">
+      <div class="drag-dot"></div>
+      <div class="drag-dot"></div>
+      <div class="drag-dot"></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

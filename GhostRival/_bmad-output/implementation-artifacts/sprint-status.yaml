@@ -1,0 +1,94 @@
+# generated: 2026-06-19
+# last_updated: 2026-06-19
+# project: test-project
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-06-19
+last_updated: 2026-06-20T21:00:00
+project: test-project
+
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # ──────────────────────────────────────────
+  # Epic 1: App Foundation & Core Workout Logging
+  # ──────────────────────────────────────────
+  epic-1: in-progress
+  1-1-project-foundation-and-navigation-shell: done
+  1-2-exercise-management-create-rename-delete: done
+  1-3-session-lifecycle-start-add-exercises-end: done
+  1-4-strength-set-logging: done
+  1-5-cardio-set-logging: done
+  1-6-draft-session-recovery-resume-and-discard: backlog
+  epic-1-retrospective: optional
+
+  # ──────────────────────────────────────────
+  # Epic 2: Ambient Session — Rest Timer & Platform Overlays
+  # ──────────────────────────────────────────
+  epic-2: backlog
+  2-1-rest-timer-bar-and-in-app-timer-ux: backlog
+  2-2-android-floating-bubble: backlog
+  2-3-ios-live-activity: backlog
+  2-4-rest-timer-skip-and-extend-from-bubble: backlog
+  epic-2-retrospective: optional
+
+  # ──────────────────────────────────────────
+  # Epic 3: Ghost Rival System & PR Celebration
+  # ──────────────────────────────────────────
+  epic-3: backlog
+  3-1-ghost-type-selection-and-home-tab-ghost-row: backlog
+  3-2-live-ghost-comparison-during-session: backlog
+  3-3-pr-detection-engine: backlog
+  3-4-hall-of-fame-view-and-ghost-retirement: backlog
+  3-5-pr-explosion-animation-and-accessibility: backlog
+  epic-3-retrospective: optional
+
+  # ──────────────────────────────────────────
+  # Epic 4: Progress Visibility & Motivation
+  # ──────────────────────────────────────────
+  epic-4: backlog
+  4-1-infinite-goal-engine-and-goal-display: backlog
+  4-2-gym-streak-and-mercy-days: backlog
+  epic-4-retrospective: optional
+
+  # ──────────────────────────────────────────
+  # Epic 5: Cloud Backup & Account
+  # ──────────────────────────────────────────
+  epic-5: backlog
+  5-1-onboarding-and-optional-account-creation: backlog
+  5-2-offline-first-sync-queue-and-cloud-backup: backlog
+  5-3-data-export-and-account-management: backlog
+  epic-5-retrospective: optional
