@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-19
-last_updated: 2026-06-21  # updated: 2-1 to done
+last_updated: 2026-06-21  # updated: 2-1 to done, 2-2 to done (code review applied all patches)
 project: test-project
 
 project_key: NOKEY
@@ -60,7 +60,7 @@ development_status:
   # ──────────────────────────────────────────
   epic-2: in-progress
   2-1-rest-timer-bar-and-in-app-timer-ux: done
-  2-2-android-floating-bubble: backlog
+  2-2-android-floating-bubble: done
   2-3-ios-live-activity: backlog
   2-4-rest-timer-skip-and-extend-from-bubble: backlog
   epic-2-retrospective: optional

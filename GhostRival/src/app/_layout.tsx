@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, Platform } from 'react-native'
 import { Stack, router } from 'expo-router'
+import { addNotificationResponseReceivedListener } from 'expo-notifications'
+import { setupNotificationChannel } from '../lib/bubbleNotification'
 import type { ErrorBoundaryProps } from 'expo-router'
 import { useFonts } from 'expo-font'
 import {
@@ -62,6 +64,21 @@ export default function RootLayout() {
       SessionsQueries.getDraftSession()
         .then(setDraftSession)
         .catch(() => setDraftSession(null))
+
+      // Android notification channel + tap handler for session fallback notifications
+      if (Platform.OS === 'android') {
+        let sub: ReturnType<typeof addNotificationResponseReceivedListener> | null = null
+        setupNotificationChannel().catch(() => {})
+        try {
+          sub = addNotificationResponseReceivedListener((response) => {
+            const data = response.notification.request.content.data
+            if (data?.screen === 'session') {
+              router.push('/session/active')
+            }
+          })
+        } catch {}
+        return () => { sub?.remove() }
+      }
     }
   }, [fontsLoaded, migrationsSuccess])
 

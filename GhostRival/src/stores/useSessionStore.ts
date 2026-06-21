@@ -12,6 +12,7 @@ interface SessionStore {
   restTimerTotalSeconds: number
   restTimerFlashing: boolean
   prExplosionPending: { exerciseId: string; prData: unknown } | null
+  bubbleMode: 'bubble' | 'notification' | 'none'
   setPhase: (phase: SessionPhase) => void
   setActiveSessionId: (id: string | null) => void
   setCurrentExerciseId: (id: string | null) => void
@@ -21,6 +22,7 @@ interface SessionStore {
   setRestTimerTotalSeconds: (seconds: number) => void
   setRestTimerFlashing: (flashing: boolean) => void
   setPrExplosionPending: (data: { exerciseId: string; prData: unknown } | null) => void
+  setBubbleMode: (mode: 'bubble' | 'notification' | 'none') => void
   reset: () => void
 }
 
@@ -35,6 +37,7 @@ const initialState = {
   restTimerTotalSeconds: 0,
   restTimerFlashing: false,
   prExplosionPending: null,
+  bubbleMode: 'none' as 'bubble' | 'notification' | 'none',
 }
 
 export const useSessionStore = create<SessionStore>((set) => ({
@@ -53,5 +56,6 @@ export const useSessionStore = create<SessionStore>((set) => ({
   setRestTimerTotalSeconds: (seconds) => set({ restTimerTotalSeconds: seconds }),
   setRestTimerFlashing: (flashing) => set({ restTimerFlashing: flashing }),
   setPrExplosionPending: (data) => set({ prExplosionPending: data }),
+  setBubbleMode: (mode) => set({ bubbleMode: mode }),
   reset: () => set(initialState),
 }))

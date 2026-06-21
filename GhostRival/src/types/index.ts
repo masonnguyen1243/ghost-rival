@@ -50,6 +50,14 @@ export interface SetPrefill {
   distanceM: number | null
 }
 
+export interface BubbleOptions {
+  timerSeconds: number
+  exerciseName: string
+  prefill: SetPrefill
+}
+
+export type BubblePermissionStatus = 'granted' | 'denied' | 'not_determined'
+
 export type SyncOperation = 'insert' | 'update' | 'delete'
 
 export type SessionPhase = 'idle' | 'active' | 'draft'

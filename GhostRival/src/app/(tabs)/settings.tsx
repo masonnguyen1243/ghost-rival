@@ -7,6 +7,7 @@ import {
   TextInput,
   Alert,
   StyleSheet,
+  Platform,
 } from 'react-native'
 import {
   SURFACE_BASE,
@@ -22,6 +23,7 @@ import {
 } from '../../constants'
 import { useExercises } from '../../hooks/useExercises'
 import { useSettingsStore } from '../../stores/useSettingsStore'
+import { FloatingBubbleModule } from '../../modules/floating-bubble/FloatingBubbleModule'
 import type { DisplayExercise, ExerciseType } from '../../types'
 
 interface RenameState {
@@ -34,6 +36,8 @@ interface RenameState {
 export default function SettingsScreen() {
   const { exercises, renameExercise, deleteExercise, checkDuplicateName, setRestTimerSeconds } = useExercises()
   const defaultRestTimerSeconds = useSettingsStore((s) => s.defaultRestTimerSeconds)
+  const hasShownBubblePrompt = useSettingsStore((s) => s.hasShownBubblePrompt)
+  const bubbleEnabled = useSettingsStore((s) => s.bubbleEnabled)
   const [renaming, setRenaming] = useState<RenameState | null>(null)
   const [restTimerEditId, setRestTimerEditId] = useState<string | null>(null)
   const [restTimerDraft, setRestTimerDraft] = useState<string>('')
@@ -264,6 +268,23 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {Platform.OS === 'android' && hasShownBubblePrompt && !bubbleEnabled && (
+        <>
+          <Text style={styles.sectionHeader}>SESSION</Text>
+          <View style={styles.settingCard}>
+            <TouchableOpacity
+              style={styles.settingRow}
+              onPress={() => FloatingBubbleModule.openPermissionSettings()}
+              accessibilityRole="button"
+              accessibilityLabel="Enable Ghost Bubble overlay permission"
+            >
+              <Text style={styles.settingLabel}>Enable Ghost Bubble</Text>
+              <Text style={styles.settingChevron}>›</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+
       <Text style={styles.sectionHeader}>EXERCISE MANAGEMENT</Text>
 
       {exercises.length === 0 ? (
@@ -463,5 +484,27 @@ const styles = StyleSheet.create({
     color: FEEDBACK_ERROR,
     fontFamily: 'DMSans_500Medium',
     fontSize: 14,
+  },
+  settingCard: {
+    backgroundColor: SURFACE_RAISED,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    minHeight: 52,
+  },
+  settingLabel: {
+    color: INK_PRIMARY,
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 16,
+  },
+  settingChevron: {
+    color: INK_SECONDARY,
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 20,
   },
 })

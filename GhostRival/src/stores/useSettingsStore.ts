@@ -10,9 +10,13 @@ interface SettingsStore {
   unit: WeightUnit
   defaultRestTimerSeconds: number
   accountState: AccountState
+  hasShownBubblePrompt: boolean
+  bubbleEnabled: boolean
   setUnit: (unit: WeightUnit) => void
   setDefaultRestTimerSeconds: (seconds: number) => void
   setAccountState: (state: AccountState) => void
+  setHasShownBubblePrompt: (shown: boolean) => void
+  setBubbleEnabled: (enabled: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -21,9 +25,13 @@ export const useSettingsStore = create<SettingsStore>()(
       unit: 'kg',
       defaultRestTimerSeconds: DEFAULT_REST_TIMER_SECONDS,
       accountState: 'anonymous',
+      hasShownBubblePrompt: false,
+      bubbleEnabled: false,
       setUnit: (unit) => set({ unit }),
       setDefaultRestTimerSeconds: (seconds) => set({ defaultRestTimerSeconds: seconds }),
       setAccountState: (state) => set({ accountState: state }),
+      setHasShownBubblePrompt: (shown) => set({ hasShownBubblePrompt: shown }),
+      setBubbleEnabled: (enabled) => set({ bubbleEnabled: enabled }),
     }),
     {
       name: 'settings-store',
@@ -31,6 +39,8 @@ export const useSettingsStore = create<SettingsStore>()(
       partialize: (state) => ({
         unit: state.unit,
         defaultRestTimerSeconds: state.defaultRestTimerSeconds,
+        hasShownBubblePrompt: state.hasShownBubblePrompt,
+        bubbleEnabled: state.bubbleEnabled,
       }),
     }
   )

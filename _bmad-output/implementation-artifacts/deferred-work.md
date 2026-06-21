@@ -1,5 +1,11 @@
 # Deferred Work
 
+## Deferred from: code review of 2-2-android-floating-bubble (2026-06-21)
+
+- **Native FloatingBubbleService.kt scaffold stubs** — `updateBubbleDisplay()`, `triggerAtZeroPulse()`, `sendTapEvent()`, `sendLongPressEvent()`, and permission revocation event are stub implementations. AC4 visual spec, AC5 pulse animation, AC6 tap event, AC7 long-press edit sheet, AC10 revocation event must be completed in native iteration. [`android/.../FloatingBubbleService.kt`]
+- **dismissAllNotificationsAsync() too broad** — Cancels all app notifications, not just the session one. No second notification type exists yet. Add per-ID cancellation (`cancelScheduledNotificationAsync(id)`) when a second notification type is introduced. [`src/lib/bubbleNotification.ts`]
+- **com.anonymous.GhostRival Android package name** — Pre-existing dev placeholder; already in deferred-work from story 1-1. Requires new app install after rename; address before store submission. [`GhostRival/app.json`]
+
 ## Deferred from: code review of 2-1-rest-timer-bar-and-in-app-timer-ux (2026-06-21)
 
 - **`maxLength={4}` allows "9999" with no save feedback** — Spec says "no inline error UI required"; silent reject on Save is specified behavior. Add feedback in a future UX polish pass. [GhostRival/src/app/(tabs)/settings.tsx]

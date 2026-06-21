@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   View,
   Text,
@@ -7,10 +7,20 @@ import {
   StyleSheet,
   BackHandler,
   AccessibilityInfo,
+  AppState,
+  Platform,
 } from 'react-native'
 import { router } from 'expo-router'
 import { useSessionStore } from '../../stores/useSessionStore'
 import { useSettingsStore } from '../../stores/useSettingsStore'
+import { FloatingBubbleModule } from '../../modules/floating-bubble/FloatingBubbleModule'
+import { BubblePermissionPrompt } from '../../components/session/BubblePermissionPrompt'
+import { useFloatingBubble } from '../../hooks/useFloatingBubble'
+import {
+  requestNotificationPermission,
+  dismissSessionNotification,
+} from '../../lib/bubbleNotification'
+import type { SetPrefill } from '../../types'
 import { useSessions } from '../../hooks/useSessions'
 import { useSessionExercises } from '../../hooks/useSessionExercises'
 import { useLiveSetsByExercise, useSetActions } from '../../hooks/useSets'
@@ -69,10 +79,14 @@ export default function ActiveSessionScreen() {
   const addExerciseToSession = useSessionStore((s) => s.addExerciseToSession)
   const unit = useSettingsStore((s) => s.unit)
   const { endSession, discardSession, getSetCount } = useSessions()
-  const { deleteSetForUndo, restoreSet } = useSetActions()
+  const { deleteSetForUndo, restoreSet, logStrengthSet } = useSetActions()
 
   const sessionExercises = useSessionExercises(sessionExerciseIds)
   const { startTimer } = useRestTimer()
+
+  const setBubbleMode = useSessionStore((s) => s.setBubbleMode)
+  const { hasShownBubblePrompt, bubbleEnabled, setHasShownBubblePrompt, setBubbleEnabled } =
+    useSettingsStore()
 
   const [showEndConfirmation, setShowEndConfirmation] = useState(false)
   const [showExercisePicker, setShowExercisePicker] = useState(false)
@@ -83,10 +97,104 @@ export default function ActiveSessionScreen() {
   const [undoData, setUndoData] = useState<DbSet | null>(null)
   const [showUndoToast, setShowUndoToast] = useState(false)
   const [screenReaderEnabled, setScreenReaderEnabled] = useState(false)
+  const [showBubblePrompt, setShowBubblePrompt] = useState(false)
+  const [lastExerciseName, setLastExerciseName] = useState('')
+  // P12: currentPrefill updated on set log so bubble shows correct pre-fill values
+  const [currentPrefill, setCurrentPrefill] = useState<SetPrefill>({
+    weightKg: null,
+    reps: null,
+    durationS: null,
+    distanceM: null,
+  })
+  // P11: guard against double-tap on Enable/Skip
+  const isHandlingBubbleRef = useRef(false)
+  // P0: track last active exercise for tap-to-open (AC6) and long-press log (AC7)
+  const lastActiveExerciseRef = useRef<DbExercise | null>(null)
 
   useEffect(() => {
     AccessibilityInfo.isScreenReaderEnabled().then(setScreenReaderEnabled)
   }, [])
+
+  // Show bubble permission prompt once when a new session starts on Android
+  // P2: include hasShownBubblePrompt so async MMKV hydration doesn't re-trigger prompt
+  useEffect(() => {
+    if (phase !== 'active' || hasShownBubblePrompt || Platform.OS !== 'android') return
+    setShowBubblePrompt(true)
+  }, [phase, hasShownBubblePrompt])
+
+  // Initialize bubble mode for users who already granted permission
+  useEffect(() => {
+    if (phase !== 'active' || Platform.OS !== 'android') return
+    if (bubbleEnabled) {
+      setBubbleMode('bubble')
+    } else if (hasShownBubblePrompt) {
+      setBubbleMode('notification')
+    }
+  }, [phase, bubbleEnabled, hasShownBubblePrompt])
+
+  const handleBubbleEnable = async () => {
+    // P11: guard double-tap
+    if (isHandlingBubbleRef.current) return
+    isHandlingBubbleRef.current = true
+    setShowBubblePrompt(false)
+    setHasShownBubblePrompt(true)
+    if (Platform.OS !== 'android') {
+      isHandlingBubbleRef.current = false
+      return
+    }
+    await FloatingBubbleModule.openPermissionSettings()
+    // P1: wait for AppState 'active' resume before re-checking permission —
+    // openPermissionSettings resolves as soon as the intent fires, before user acts
+    const sub = AppState.addEventListener('change', async (state) => {
+      if (state !== 'active') return
+      sub.remove()
+      const status = await FloatingBubbleModule.checkPermission()
+      if (status === 'granted') {
+        setBubbleEnabled(true)
+        setBubbleMode('bubble')
+      } else {
+        setBubbleMode('notification')
+        await requestNotificationPermission()
+      }
+      isHandlingBubbleRef.current = false
+    })
+  }
+
+  const handleBubbleSkip = async () => {
+    // P11: guard double-tap; P14: guard iOS
+    if (isHandlingBubbleRef.current) return
+    isHandlingBubbleRef.current = true
+    setShowBubblePrompt(false)
+    setHasShownBubblePrompt(true)
+    if (Platform.OS === 'android') {
+      setBubbleMode('notification')
+      await requestNotificationPermission()
+    }
+    isHandlingBubbleRef.current = false
+  }
+
+  useFloatingBubble({
+    // AC6: bubble tap brings app to foreground; open SetEntrySheet for last active exercise
+    onTapPrefill: (_prefill) => {
+      if (lastActiveExerciseRef.current) {
+        setActiveExerciseForEntry(lastActiveExerciseRef.current)
+      }
+    },
+    // AC7: native long-press edit sheet confirmed a set; log it without bringing app to foreground
+    // prefill.weightKg is stored in kg; logStrengthSet expects display unit — convert back
+    onLongPressConfirm: (prefill) => {
+      const exercise = lastActiveExerciseRef.current
+      if (!activeSessionId || !exercise) return
+      if (exercise.type === 'strength' && prefill.weightKg !== null && prefill.reps !== null) {
+        const displayWeight = unit === 'lb' ? prefill.weightKg * 2.20462 : prefill.weightKg
+        logStrengthSet(exercise.id, displayWeight, prefill.reps)
+        setCurrentPrefill(prefill)
+        handleSetLogged(exercise.id)
+      }
+    },
+    exerciseName: lastExerciseName,
+    currentPrefill,
+  })
 
   const handleEndWorkoutTap = useCallback(async () => {
     if (endingInFlight || showEndConfirmation) return
@@ -136,6 +244,12 @@ export default function ActiveSessionScreen() {
     if (endingInFlight) return
     setEndingInFlight(true)
     setShowEndConfirmation(false)
+    try {
+      if (Platform.OS === 'android') {
+        await FloatingBubbleModule.hide()
+        await dismissSessionNotification()
+      }
+    } catch {}
     const ok = await endSession()
     setEndingInFlight(false)
     if (ok) {
@@ -147,6 +261,12 @@ export default function ActiveSessionScreen() {
     if (endingInFlight) return
     setEndingInFlight(true)
     setShowEndConfirmation(false)
+    try {
+      if (Platform.OS === 'android') {
+        await FloatingBubbleModule.hide()
+        await dismissSessionNotification()
+      }
+    } catch {}
     const ok = await discardSession()
     setEndingInFlight(false)
     if (ok) {
@@ -254,7 +374,13 @@ export default function ActiveSessionScreen() {
                 <View style={styles.exerciseBlock}>
                   <TouchableOpacity
                     style={styles.exerciseCard}
-                    onPress={() => !isDeleted && setActiveExerciseForEntry(item)}
+                    onPress={() => {
+                      if (!isDeleted) {
+                        setActiveExerciseForEntry(item)
+                        setLastExerciseName(item.name)
+                        lastActiveExerciseRef.current = item
+                      }
+                    }}
                     disabled={isDeleted}
                     accessibilityRole="button"
                     accessibilityLabel={isDeleted ? `${item.name} (deleted)` : item.name}
@@ -347,6 +473,12 @@ export default function ActiveSessionScreen() {
         onUndo={handleUndo}
         onDismiss={handleToastDismiss}
         screenReaderEnabled={screenReaderEnabled}
+      />
+
+      <BubblePermissionPrompt
+        visible={showBubblePrompt}
+        onEnable={handleBubbleEnable}
+        onSkip={handleBubbleSkip}
       />
     </View>
   )

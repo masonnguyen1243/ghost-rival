@@ -17,7 +17,15 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.GhostRival",
+      "permissions": [
+        "SYSTEM_ALERT_WINDOW",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "POST_NOTIFICATIONS",
+        "VIBRATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -26,7 +34,8 @@
       "expo-sqlite",
       "expo-font",
       "expo-splash-screen",
-      "expo-router"
+      "expo-router",
+      ["expo-notifications", { "icon": "./assets/notification-icon.png", "color": "#0d0d0f" }]
     ]
   }
 }
