@@ -20,7 +20,9 @@ import { ExerciseCreator } from '../../components/session/ExerciseCreator'
 import { SetEntrySheet } from '../../components/session/SetEntrySheet'
 import { CardioSetEntrySheet } from '../../components/session/CardioSetEntrySheet'
 import { SetRow } from '../../components/session/SetRow'
+import { RestTimerBar } from '../../components/session/RestTimerBar'
 import { UndoToast } from '../../components/session/UndoToast'
+import { useRestTimer } from '../../hooks/useRestTimer'
 import {
   SURFACE_BASE,
   SURFACE_RAISED,
@@ -70,6 +72,7 @@ export default function ActiveSessionScreen() {
   const { deleteSetForUndo, restoreSet } = useSetActions()
 
   const sessionExercises = useSessionExercises(sessionExerciseIds)
+  const { startTimer } = useRestTimer()
 
   const [showEndConfirmation, setShowEndConfirmation] = useState(false)
   const [showExercisePicker, setShowExercisePicker] = useState(false)
@@ -198,6 +201,12 @@ export default function ActiveSessionScreen() {
     setShowUndoToast(false)
   }, [])
 
+  const handleSetLogged = useCallback((exerciseId: string) => {
+    const exercise = sessionExercises.find((e) => e.id === exerciseId)
+    const duration = exercise?.rest_timer_seconds ?? useSettingsStore.getState().defaultRestTimerSeconds
+    startTimer(duration)
+  }, [sessionExercises, startTimer])
+
   const isEmpty = sessionExerciseIds.length === 0
 
   return (
@@ -315,7 +324,7 @@ export default function ActiveSessionScreen() {
             sessionId={activeSessionId}
             unit={unit}
             onDismiss={() => setActiveExerciseForEntry(null)}
-            onLogged={() => {}}
+            onLogged={() => handleSetLogged(activeExerciseForEntry.id)}
           />
         ) : (
           <SetEntrySheet
@@ -325,10 +334,13 @@ export default function ActiveSessionScreen() {
             sessionId={activeSessionId}
             unit={unit}
             onDismiss={() => setActiveExerciseForEntry(null)}
-            onLogged={() => {}}
+            onLogged={() => handleSetLogged(activeExerciseForEntry.id)}
           />
         )
       )}
+
+      {/* Rest Timer — pinned to screen bottom */}
+      <RestTimerBar />
 
       <UndoToast
         visible={showUndoToast}
@@ -370,7 +382,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-    paddingBottom: 100,
+    paddingBottom: 150,
   },
   exerciseBlock: {
     marginBottom: 8,

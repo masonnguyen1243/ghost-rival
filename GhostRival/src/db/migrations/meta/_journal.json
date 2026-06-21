@@ -15,6 +15,13 @@
       "when": 1781884994757,
       "tag": "0001_steep_gateway",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1782009239546,
+      "tag": "0002_steep_black_tarantula",
+      "breakpoints": true
     }
   ]
 }

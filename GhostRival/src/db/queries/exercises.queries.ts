@@ -28,6 +28,13 @@ export async function getExercisesByIds(ids: string[]) {
   return db.select().from(exercises).where(inArray(exercises.id, ids))
 }
 
+export async function setExerciseRestTimerSeconds(id: string, seconds: number | null): Promise<void> {
+  await db
+    .update(exercises)
+    .set({ rest_timer_seconds: seconds })
+    .where(and(eq(exercises.id, id), isNull(exercises.deleted_at)))
+}
+
 export async function checkDuplicateName(
   name: string,
   type: ExerciseType,

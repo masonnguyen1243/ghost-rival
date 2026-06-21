@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-19
-last_updated: 2026-06-21
+last_updated: 2026-06-21  # updated: 2-1 to done
 project: test-project
 
 project_key: NOKEY
@@ -58,8 +58,8 @@ development_status:
   # ──────────────────────────────────────────
   # Epic 2: Ambient Session — Rest Timer & Platform Overlays
   # ──────────────────────────────────────────
-  epic-2: backlog
-  2-1-rest-timer-bar-and-in-app-timer-ux: backlog
+  epic-2: in-progress
+  2-1-rest-timer-bar-and-in-app-timer-ux: done
   2-2-android-floating-bubble: backlog
   2-3-ios-live-activity: backlog
   2-4-rest-timer-skip-and-extend-from-bubble: backlog

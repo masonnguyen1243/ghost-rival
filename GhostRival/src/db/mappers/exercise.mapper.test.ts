@@ -7,6 +7,7 @@ const makeDbExercise = (overrides?: Partial<DbExercise>): DbExercise => ({
   type: 'strength',
   created_at: 1718764800, // 2024-06-19 00:00:00 UTC in epoch seconds
   deleted_at: null,
+  rest_timer_seconds: null,
   ...overrides,
 })
 
@@ -38,5 +39,15 @@ describe('mapDbExerciseToDisplay', () => {
   it('does not include created_at epoch in display type', () => {
     const result = mapDbExerciseToDisplay(makeDbExercise())
     expect('created_at' in result).toBe(false)
+  })
+
+  it('maps rest_timer_seconds to restTimerSeconds', () => {
+    const result = mapDbExerciseToDisplay(makeDbExercise({ rest_timer_seconds: 120 }))
+    expect(result.restTimerSeconds).toBe(120)
+  })
+
+  it('maps null rest_timer_seconds to null restTimerSeconds', () => {
+    const result = mapDbExerciseToDisplay(makeDbExercise({ rest_timer_seconds: null }))
+    expect(result.restTimerSeconds).toBeNull()
   })
 })

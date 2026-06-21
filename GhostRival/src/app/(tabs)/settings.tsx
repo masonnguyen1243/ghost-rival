@@ -21,6 +21,7 @@ import {
   PR_BURST,
 } from '../../constants'
 import { useExercises } from '../../hooks/useExercises'
+import { useSettingsStore } from '../../stores/useSettingsStore'
 import type { DisplayExercise, ExerciseType } from '../../types'
 
 interface RenameState {
@@ -31,8 +32,11 @@ interface RenameState {
 }
 
 export default function SettingsScreen() {
-  const { exercises, renameExercise, deleteExercise, checkDuplicateName } = useExercises()
+  const { exercises, renameExercise, deleteExercise, checkDuplicateName, setRestTimerSeconds } = useExercises()
+  const defaultRestTimerSeconds = useSettingsStore((s) => s.defaultRestTimerSeconds)
   const [renaming, setRenaming] = useState<RenameState | null>(null)
+  const [restTimerEditId, setRestTimerEditId] = useState<string | null>(null)
+  const [restTimerDraft, setRestTimerDraft] = useState<string>('')
   const renameDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -101,6 +105,36 @@ export default function SettingsScreen() {
     )
   }
 
+  const handleSaveRestTimer = async (id: string) => {
+    const val = parseInt(restTimerDraft, 10)
+    // P3: show feedback on invalid input instead of silently no-oping
+    if (!Number.isInteger(val) || val < 1 || val > 3600) {
+      Alert.alert('Invalid duration', 'Please enter a value between 1 and 3600 seconds.')
+      return
+    }
+    // P5: capture ID before await — async completion must not close a different editor
+    const editingId = id
+    try {
+      // P4: catch DB errors so the UI stays consistent
+      await setRestTimerSeconds(editingId, val)
+      // P5: functional update reads current state — won't close a different editor opened mid-flight
+      setRestTimerEditId((cur) => (cur === editingId ? null : cur))
+    } catch {
+      Alert.alert('Error', 'Could not save rest timer. Please try again.')
+    }
+  }
+
+  const handleClearRestTimer = async (id: string) => {
+    const editingId = id
+    try {
+      // P4: catch DB errors
+      await setRestTimerSeconds(editingId, null)
+      setRestTimerEditId((cur) => (cur === editingId ? null : cur))
+    } catch {
+      Alert.alert('Error', 'Could not clear rest timer. Please try again.')
+    }
+  }
+
   const renderExerciseRow = (exercise: DisplayExercise) => {
     const isRenaming = renaming?.id === exercise.id
     return (
@@ -164,6 +198,64 @@ export default function SettingsScreen() {
                 <Text style={styles.deleteBtnText}>Delete</Text>
               </TouchableOpacity>
             </View>
+            {/* Rest Timer config row */}
+            {restTimerEditId === exercise.id ? (
+              <View style={styles.restTimerEditRow}>
+                <TextInput
+                  style={styles.restTimerInput}
+                  value={restTimerDraft}
+                  onChangeText={setRestTimerDraft}
+                  keyboardType="number-pad"
+                  placeholder="Default"
+                  placeholderTextColor={INK_DISABLED}
+                  accessibilityLabel={`Custom rest timer for ${exercise.name} in seconds`}
+                  maxLength={4}
+                />
+                <Text style={styles.restTimerUnit}>sec</Text>
+                <TouchableOpacity
+                  style={styles.restTimerSaveBtn}
+                  onPress={() => handleSaveRestTimer(exercise.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Save rest timer"
+                >
+                  <Text style={styles.restTimerSaveBtnText}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.restTimerClearBtn}
+                  onPress={() => handleClearRestTimer(exercise.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear rest timer (use default)"
+                >
+                  <Text style={styles.restTimerClearBtnText}>Clear</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelBtn}
+                  onPress={() => setRestTimerEditId(null)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Cancel rest timer edit"
+                >
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.restTimerRow}
+                onPress={() => {
+                  setRestTimerEditId(exercise.id)
+                  setRestTimerDraft(exercise.restTimerSeconds !== null ? String(exercise.restTimerSeconds) : '')
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={`Rest timer for ${exercise.name}: ${exercise.restTimerSeconds !== null ? `${exercise.restTimerSeconds} seconds` : 'default'}`}
+                hitSlop={{ top: 4, bottom: 4, left: 0, right: 0 }}
+              >
+                <Text style={styles.restTimerLabel}>REST TIMER</Text>
+                <Text style={styles.restTimerValue}>
+                  {exercise.restTimerSeconds !== null
+                    ? `${exercise.restTimerSeconds}s`
+                    : `${defaultRestTimerSeconds}s (default)`}
+                </Text>
+              </TouchableOpacity>
+            )}
           </>
         )}
       </View>
@@ -306,6 +398,70 @@ const styles = StyleSheet.create({
   cancelBtnText: {
     color: INK_SECONDARY,
     fontFamily: 'DMSans_400Regular',
+    fontSize: 14,
+  },
+  restTimerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    minHeight: 36,
+  },
+  restTimerLabel: {
+    color: INK_SECONDARY,
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 11,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  restTimerValue: {
+    color: INK_SECONDARY,
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 13,
+  },
+  restTimerEditRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+  },
+  restTimerInput: {
+    flex: 1,
+    height: 44,
+    backgroundColor: SURFACE_OVERLAY,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    color: INK_PRIMARY,
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
+    borderWidth: 1,
+    borderColor: BORDER_SUBTLE,
+  },
+  restTimerUnit: {
+    color: INK_SECONDARY,
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 13,
+  },
+  restTimerSaveBtn: {
+    minHeight: 44,
+    minWidth: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  restTimerSaveBtnText: {
+    color: GHOST_ACCENT,
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 14,
+  },
+  restTimerClearBtn: {
+    minHeight: 44,
+    minWidth: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  restTimerClearBtnText: {
+    color: FEEDBACK_ERROR,
+    fontFamily: 'DMSans_500Medium',
     fontSize: 14,
   },
 })

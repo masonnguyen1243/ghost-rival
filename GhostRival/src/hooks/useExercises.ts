@@ -24,6 +24,7 @@ export function useExercises() {
         name: name.trim(),
         type,
         createdAt: new Date(),
+        restTimerSeconds: null,
       }
     } catch (e) {
       console.error('[Exercises] createExercise failed:', e)
@@ -63,11 +64,21 @@ export function useExercises() {
     }
   }
 
+  async function setRestTimerSeconds(id: string, seconds: number | null): Promise<void> {
+    try {
+      await ExercisesQueries.setExerciseRestTimerSeconds(id, seconds)
+    } catch (e) {
+      console.error('[Exercises] setRestTimerSeconds failed:', e)
+      showToast('Could not save rest timer. Try again.', 'error')
+    }
+  }
+
   return {
     exercises: (data ?? []).map(mapDbExerciseToDisplay),
     createExercise,
     renameExercise,
     deleteExercise,
     checkDuplicateName,
+    setRestTimerSeconds,
   }
 }

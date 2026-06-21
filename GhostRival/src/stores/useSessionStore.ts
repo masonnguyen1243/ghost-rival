@@ -9,6 +9,8 @@ interface SessionStore {
   sessionExerciseIds: string[]
   restTimerSeconds: number
   restTimerRunning: boolean
+  restTimerTotalSeconds: number
+  restTimerFlashing: boolean
   prExplosionPending: { exerciseId: string; prData: unknown } | null
   setPhase: (phase: SessionPhase) => void
   setActiveSessionId: (id: string | null) => void
@@ -16,6 +18,8 @@ interface SessionStore {
   addExerciseToSession: (id: string) => void
   setRestTimerSeconds: (seconds: number) => void
   setRestTimerRunning: (running: boolean) => void
+  setRestTimerTotalSeconds: (seconds: number) => void
+  setRestTimerFlashing: (flashing: boolean) => void
   setPrExplosionPending: (data: { exerciseId: string; prData: unknown } | null) => void
   reset: () => void
 }
@@ -28,6 +32,8 @@ const initialState = {
   sessionExerciseIds: [] as string[],
   restTimerSeconds: 0,
   restTimerRunning: false,
+  restTimerTotalSeconds: 0,
+  restTimerFlashing: false,
   prExplosionPending: null,
 }
 
@@ -44,6 +50,8 @@ export const useSessionStore = create<SessionStore>((set) => ({
     })),
   setRestTimerSeconds: (seconds) => set({ restTimerSeconds: seconds }),
   setRestTimerRunning: (running) => set({ restTimerRunning: running }),
+  setRestTimerTotalSeconds: (seconds) => set({ restTimerTotalSeconds: seconds }),
+  setRestTimerFlashing: (flashing) => set({ restTimerFlashing: flashing }),
   setPrExplosionPending: (data) => set({ prExplosionPending: data }),
   reset: () => set(initialState),
 }))

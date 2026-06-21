@@ -6,5 +6,6 @@ export function mapDbExerciseToDisplay(dbExercise: DbExercise): DisplayExercise 
     name: dbExercise.name,
     type: dbExercise.type,
     createdAt: new Date(dbExercise.created_at * 1000),
+    restTimerSeconds: dbExercise.rest_timer_seconds ?? null,
   }
 }

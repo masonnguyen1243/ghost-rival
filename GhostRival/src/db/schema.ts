@@ -6,6 +6,7 @@ export const exercises = sqliteTable('exercises', {
   type: text('type', { enum: ['strength', 'cardio'] }).notNull(),
   created_at: integer('created_at').notNull(),
   deleted_at: integer('deleted_at'),
+  rest_timer_seconds: integer('rest_timer_seconds'),
 })
 
 export const sessions = sqliteTable('sessions', {

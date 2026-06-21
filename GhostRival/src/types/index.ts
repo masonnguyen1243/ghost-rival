@@ -6,6 +6,7 @@ export interface DbExercise {
   type: ExerciseType
   created_at: number
   deleted_at: number | null
+  rest_timer_seconds: number | null
 }
 
 export interface DisplayExercise {
@@ -13,6 +14,7 @@ export interface DisplayExercise {
   name: string
   type: ExerciseType
   createdAt: Date
+  restTimerSeconds: number | null
 }
 
 export type GhostType = 'last_session' | 'last_week' | 'last_month' | 'all_time_pr'

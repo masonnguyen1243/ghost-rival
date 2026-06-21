@@ -1,5 +1,11 @@
 # Deferred Work
 
+## Deferred from: code review of 2-1-rest-timer-bar-and-in-app-timer-ux (2026-06-21)
+
+- **`maxLength={4}` allows "9999" with no save feedback** — Spec says "no inline error UI required"; silent reject on Save is specified behavior. Add feedback in a future UX polish pass. [GhostRival/src/app/(tabs)/settings.tsx]
+- **Timer store state not reset on back-navigation without ending session** — `reset()` handles the normal session-end flow; abnormal back-navigation is an edge case outside this story's scope. Revisit in Epic 2/3 when session lifecycle is more complex. [GhostRival/src/hooks/useRestTimer.ts]
+- **Stale `sessionExercises` race on AC3 first set logged** — The `??` fallback to `defaultRestTimerSeconds` is correct behavior when the exercise isn't found; this race is extremely unlikely during normal use. [GhostRival/src/app/session/active.tsx]
+
 ## Deferred from: code review of 1-6-draft-session-recovery-resume-and-discard (2026-06-21)
 
 - **Dead hook exports in useSessions.ts** — `checkAndGetDraftSession`, `resumeDraftSession`, `saveSessionAsComplete` are exported but never called from the recovery flow (design decision per dev notes, but creates maintenance confusion). [src/hooks/useSessions.ts]

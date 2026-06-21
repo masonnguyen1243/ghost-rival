@@ -47,6 +47,7 @@ import {
   renameExercise,
   softDeleteExercise,
   checkDuplicateName,
+  setExerciseRestTimerSeconds,
 } from './exercises.queries'
 import { db } from '../client'
 
@@ -144,6 +145,30 @@ describe('softDeleteExercise', () => {
     const call = (mockDb.set as jest.Mock).mock.calls[0][0]
     expect(call.deleted_at).toBeGreaterThanOrEqual(before)
     expect(call.deleted_at).toBeLessThanOrEqual(after)
+  })
+})
+
+describe('setExerciseRestTimerSeconds', () => {
+  it('sets a positive integer value correctly', async () => {
+    ;(mockDb.where as jest.Mock).mockResolvedValue(undefined)
+    await setExerciseRestTimerSeconds('exercise-id-1', 120)
+    expect(mockDb.update).toHaveBeenCalled()
+    expect(mockDb.set).toHaveBeenCalledWith(expect.objectContaining({ rest_timer_seconds: 120 }))
+    expect(mockDb.where).toHaveBeenCalled()
+  })
+
+  it('sets null correctly to clear the custom override', async () => {
+    ;(mockDb.where as jest.Mock).mockResolvedValue(undefined)
+    await setExerciseRestTimerSeconds('exercise-id-1', null)
+    expect(mockDb.update).toHaveBeenCalled()
+    expect(mockDb.set).toHaveBeenCalledWith(expect.objectContaining({ rest_timer_seconds: null }))
+  })
+
+  it('uses isNull(deleted_at) guard to skip soft-deleted exercises', async () => {
+    ;(mockDb.where as jest.Mock).mockResolvedValue(undefined)
+    await setExerciseRestTimerSeconds('deleted-exercise-id', 60)
+    const { isNull } = jest.requireMock('drizzle-orm')
+    expect(isNull).toHaveBeenCalledWith(expect.anything())
   })
 })
 
