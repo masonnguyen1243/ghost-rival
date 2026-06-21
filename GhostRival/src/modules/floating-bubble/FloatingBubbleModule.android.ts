@@ -78,4 +78,18 @@ export const FloatingBubbleModule: IFloatingBubbleModule = {
     const sub = emitter.addListener('FloatingBubblePermissionRevoked', callback)
     return () => sub.remove()
   },
+
+  onSkipRest: (callback: () => void): (() => void) => {
+    if (!emitter) return () => {}
+    const sub = emitter.addListener('FloatingBubbleSkipRest', callback)
+    return () => sub.remove()
+  },
+
+  onExtendRest: (callback: (seconds: number) => void): (() => void) => {
+    if (!emitter) return () => {}
+    const sub = emitter.addListener('FloatingBubbleExtendRest', (data: { seconds: number }) => {
+      if (typeof data?.seconds === 'number') callback(data.seconds)
+    })
+    return () => sub.remove()
+  },
 }

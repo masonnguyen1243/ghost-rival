@@ -84,7 +84,7 @@ export default function ActiveSessionScreen() {
   const { deleteSetForUndo, restoreSet, logStrengthSet } = useSetActions()
 
   const sessionExercises = useSessionExercises(sessionExerciseIds)
-  const { startTimer } = useRestTimer()
+  const { startTimer, skipTimer, extendTimer } = useRestTimer()
 
   const setBubbleMode = useSessionStore((s) => s.setBubbleMode)
   const { hasShownBubblePrompt, bubbleEnabled, setHasShownBubblePrompt, setBubbleEnabled,
@@ -211,6 +211,8 @@ export default function ActiveSessionScreen() {
         handleSetLogged(exercise.id)
       }
     },
+    onSkipRest: skipTimer,
+    onExtendRest: extendTimer,
     exerciseName: lastExerciseName,
     currentPrefill,
   })

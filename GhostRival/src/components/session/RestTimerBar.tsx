@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { useSessionStore } from '../../stores/useSessionStore'
+import { useRestTimer } from '../../hooks/useRestTimer'
 import {
   BORDER_SUBTLE,
   GHOST_ACCENT,
@@ -16,6 +17,7 @@ export function RestTimerBar() {
   const setRestTimerRunning = useSessionStore((s) => s.setRestTimerRunning)
   const setRestTimerSeconds = useSessionStore((s) => s.setRestTimerSeconds)
   const setRestTimerTotalSeconds = useSessionStore((s) => s.setRestTimerTotalSeconds)
+  const { extendTimer } = useRestTimer()
 
   // P2: flash state lives in store — visible even when seconds=0 and running=false
   const isVisible = restTimerRunning || restTimerSeconds > 0 || restTimerFlashing
@@ -43,6 +45,16 @@ export function RestTimerBar() {
     <View style={styles.container}>
       <View style={styles.row}>
         <Text style={styles.countdown}>{countdown}</Text>
+        <TouchableOpacity
+          style={[styles.extendBtn, !restTimerRunning && styles.btnDisabled]}
+          onPress={() => extendTimer(30)}
+          disabled={!restTimerRunning}
+          accessibilityRole="button"
+          accessibilityLabel="Add 30 seconds to rest timer"
+          accessibilityState={{ disabled: !restTimerRunning }}
+        >
+          <Text style={styles.skipText}>+30S</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.skipBtn}
           onPress={handleSkip}
@@ -80,6 +92,16 @@ const styles = StyleSheet.create({
     minHeight: 44,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  extendBtn: {
+    minWidth: 44,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  btnDisabled: {
+    opacity: 0.4,
   },
   skipText: {
     color: INK_SECONDARY,

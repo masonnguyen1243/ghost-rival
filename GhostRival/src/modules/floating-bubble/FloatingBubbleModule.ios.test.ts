@@ -10,6 +10,8 @@ describe('FloatingBubbleModule.ios (stub)', () => {
     'onTap',
     'onLongPressConfirm',
     'onPermissionRevoked',
+    'onSkipRest',
+    'onExtendRest',
   ])('%s throws UnsupportedPlatformError', (method) => {
     let thrown: unknown
     try {

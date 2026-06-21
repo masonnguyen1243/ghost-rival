@@ -72,8 +72,17 @@ export function useRestTimer() {
     setRestTimerSeconds(0)
     setRestTimerTotalSeconds(0)
     setRestTimerFlashing(false)
-    // No haptic on skip (per AC4)
+    // No haptic on skip (per AC2)
   }
 
-  return { startTimer, skipTimer }
+  const extendTimer = (seconds: number) => {
+    if (!useSessionStore.getState().restTimerRunning) return
+    if (!seconds || seconds <= 0) return
+    const current = useSessionStore.getState().restTimerSeconds
+    const next = Math.min(current + seconds, 3600)
+    setRestTimerSeconds(next)
+    setRestTimerTotalSeconds(next)
+  }
+
+  return { startTimer, skipTimer, extendTimer }
 }

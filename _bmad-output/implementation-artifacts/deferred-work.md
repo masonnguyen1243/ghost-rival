@@ -1,5 +1,12 @@
 # Deferred Work
 
+## Deferred from: code review of 2-4-rest-timer-skip-and-extend-from-bubble (2026-06-21)
+
+- **`useFloatingBubble` registers skip/extend listeners without platform guard** — Same mount-only `useEffect` that registers `onSkipRest`/`onExtendRest` also registered `onTap`/`onLongPress`/`onPermissionRevoked` in prior stories with no crash. Pre-existing pattern; investigate platform guard when iOS Floating Bubble support is added. [`src/hooks/useFloatingBubble.ts`]
+- **`RestTimerBar.handleSkip` directly resets store without calling `skipTimer()`** — Pre-existing behavior; dev notes state "direct store mutation triggers cleanup useEffect in useRestTimer — that's fine for in-app." Revisit if double-timer or flash-timeout leaks are observed. [`src/components/session/RestTimerBar.tsx`]
+- **Callback refs may be one render stale before first `useEffect` flush** — Theoretical race if parent re-renders between child mount and effect flush. Pre-existing pattern across all ref-based callbacks in `useFloatingBubble`. [`src/hooks/useFloatingBubble.ts`]
+- **AC1 native Android edit sheet (Skip Rest + +30s buttons) not implemented** — JS event subscriptions are wired; native `FloatingBubbleService.kt` edit sheet stub deferred per dev notes, same as Story 2.2 native stubs. [`android/.../FloatingBubbleService.kt`]
+
 ## Deferred from: code review of 2-3-ios-live-activity (2026-06-21)
 
 - **`liveActivityEnabled` not re-checked after permission revocation** — User can disable Live Activities per-app in iOS Settings; `isAvailable()` returns false and `start()` fails silently but `liveActivityEnabled` stays true. Same pre-existing pattern as Android bubble. Revisit in Epic 3+. [`src/hooks/useLiveActivity.ts`]

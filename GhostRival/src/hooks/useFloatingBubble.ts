@@ -9,6 +9,8 @@ import type { SetPrefill } from '../types'
 export function useFloatingBubble(options: {
   onTapPrefill: (prefill: SetPrefill) => void
   onLongPressConfirm: (prefill: SetPrefill) => void
+  onSkipRest: () => void
+  onExtendRest: (seconds: number) => void
   exerciseName: string
   currentPrefill: SetPrefill
 }) {
@@ -25,10 +27,14 @@ export function useFloatingBubble(options: {
   // Keep callback refs current so listeners registered at mount always call latest handler
   const onTapRef = useRef(options.onTapPrefill)
   const onLongPressRef = useRef(options.onLongPressConfirm)
+  const onSkipRestRef = useRef(options.onSkipRest)
+  const onExtendRestRef = useRef(options.onExtendRest)
   useEffect(() => { prefillRef.current = options.currentPrefill }, [options.currentPrefill])
   useEffect(() => { exerciseNameRef.current = options.exerciseName }, [options.exerciseName])
   useEffect(() => { onTapRef.current = options.onTapPrefill }, [options.onTapPrefill])
   useEffect(() => { onLongPressRef.current = options.onLongPressConfirm }, [options.onLongPressConfirm])
+  useEffect(() => { onSkipRestRef.current = options.onSkipRest }, [options.onSkipRest])
+  useEffect(() => { onExtendRestRef.current = options.onExtendRest }, [options.onExtendRest])
 
   // Register event listeners on mount
   useEffect(() => {
@@ -43,10 +49,14 @@ export function useFloatingBubble(options: {
         showSessionNotification(exerciseNameRef.current, useSessionStore.getState().restTimerSeconds)
       }
     })
+    const unsubSkip = FloatingBubbleModule.onSkipRest(() => onSkipRestRef.current())
+    const unsubExtend = FloatingBubbleModule.onExtendRest((secs) => onExtendRestRef.current(secs))
     return () => {
       unsubTap()
       unsubConfirm()
       unsubRevoked()
+      unsubSkip()
+      unsubExtend()
     }
   }, []) // mount/unmount only — stable wrappers via refs above
 

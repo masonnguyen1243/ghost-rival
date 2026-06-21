@@ -17,6 +17,10 @@ export interface IFloatingBubbleModule {
   onLongPressConfirm(callback: (prefill: SetPrefill) => void): () => void
   /** Register callback for permission revocation detected mid-session. Returns unsubscribe. */
   onPermissionRevoked(callback: () => void): () => void
+  /** Register callback for skip-rest action from bubble edit sheet. Returns unsubscribe. */
+  onSkipRest(callback: () => void): () => void
+  /** Register callback for extend-rest action from bubble edit sheet. Returns unsubscribe. */
+  onExtendRest(callback: (seconds: number) => void): () => void
 }
 
 // Platform-specific implementations are imported by the module resolution:

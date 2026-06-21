@@ -16,4 +16,6 @@ export const FloatingBubbleModule: IFloatingBubbleModule = {
   onTap: () => { throw new UnsupportedPlatformError('onTap') },
   onLongPressConfirm: () => { throw new UnsupportedPlatformError('onLongPressConfirm') },
   onPermissionRevoked: () => { throw new UnsupportedPlatformError('onPermissionRevoked') },
+  onSkipRest: () => { throw new UnsupportedPlatformError('onSkipRest') },
+  onExtendRest: () => { throw new UnsupportedPlatformError('onExtendRest') },
 }
