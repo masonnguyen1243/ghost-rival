@@ -14,8 +14,10 @@ import { router } from 'expo-router'
 import { useSessionStore } from '../../stores/useSessionStore'
 import { useSettingsStore } from '../../stores/useSettingsStore'
 import { FloatingBubbleModule } from '../../modules/floating-bubble/FloatingBubbleModule'
+import { LiveActivityModule } from '../../modules/live-activity/LiveActivityModule'
 import { BubblePermissionPrompt } from '../../components/session/BubblePermissionPrompt'
 import { useFloatingBubble } from '../../hooks/useFloatingBubble'
+import { useLiveActivity } from '../../hooks/useLiveActivity'
 import {
   requestNotificationPermission,
   dismissSessionNotification,
@@ -85,7 +87,8 @@ export default function ActiveSessionScreen() {
   const { startTimer } = useRestTimer()
 
   const setBubbleMode = useSessionStore((s) => s.setBubbleMode)
-  const { hasShownBubblePrompt, bubbleEnabled, setHasShownBubblePrompt, setBubbleEnabled } =
+  const { hasShownBubblePrompt, bubbleEnabled, setHasShownBubblePrompt, setBubbleEnabled,
+    hasShownLiveActivityPrompt, setHasShownLiveActivityPrompt, setLiveActivityEnabled } =
     useSettingsStore()
 
   const [showEndConfirmation, setShowEndConfirmation] = useState(false)
@@ -132,6 +135,17 @@ export default function ActiveSessionScreen() {
     }
   }, [phase, bubbleEnabled, hasShownBubblePrompt])
 
+  // Request Live Activity permission on iOS — once, on first session start (AC1)
+  useEffect(() => {
+    if (Platform.OS !== 'ios' || phase !== 'active' || hasShownLiveActivityPrompt) return
+    setHasShownLiveActivityPrompt(true)
+    LiveActivityModule.requestPermission()
+      .then((status) => {
+        setLiveActivityEnabled(status === 'granted')
+      })
+      .catch(() => {})
+  }, [phase])
+
   const handleBubbleEnable = async () => {
     // P11: guard double-tap
     if (isHandlingBubbleRef.current) return
@@ -172,6 +186,11 @@ export default function ActiveSessionScreen() {
     }
     isHandlingBubbleRef.current = false
   }
+
+  useLiveActivity({
+    exerciseName: lastExerciseName,
+    sessionId: activeSessionId,
+  })
 
   useFloatingBubble({
     // AC6: bubble tap brings app to foreground; open SetEntrySheet for last active exercise
@@ -248,6 +267,8 @@ export default function ActiveSessionScreen() {
       if (Platform.OS === 'android') {
         await FloatingBubbleModule.hide()
         await dismissSessionNotification()
+      } else if (Platform.OS === 'ios') {
+        await LiveActivityModule.end()
       }
     } catch {}
     const ok = await endSession()
@@ -265,6 +286,8 @@ export default function ActiveSessionScreen() {
       if (Platform.OS === 'android') {
         await FloatingBubbleModule.hide()
         await dismissSessionNotification()
+      } else if (Platform.OS === 'ios') {
+        await LiveActivityModule.end()
       }
     } catch {}
     const ok = await discardSession()

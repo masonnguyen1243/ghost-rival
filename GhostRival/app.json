@@ -8,8 +8,16 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSUserNotificationUsageDescription": "Ghost Rival uses notifications to show your rest timer on the lock screen and Dynamic Island.",
+        "NSSupportsLiveActivities": true
+      },
+      "entitlements": {
+        "com.apple.developer.live-activities": true
+      }
     },
+    "scheme": "ghostrival",
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",

@@ -1,5 +1,16 @@
 # Deferred Work
 
+## Deferred from: code review of 2-3-ios-live-activity (2026-06-21)
+
+- **`liveActivityEnabled` not re-checked after permission revocation** — User can disable Live Activities per-app in iOS Settings; `isAvailable()` returns false and `start()` fails silently but `liveActivityEnabled` stays true. Same pre-existing pattern as Android bubble. Revisit in Epic 3+. [`src/hooks/useLiveActivity.ts`]
+- **`hasShownLiveActivityPrompt` set before awaiting permission result** — Deliberate guard against double-prompt on re-render; iOS OS blocks re-prompt after denial anyway; if app killed between flag write and result write, user must go to Settings. [`src/app/session/active.tsx`]
+- **`isAvailable()` not called before `start()`** — Native Swift `#available(iOS 16.2, *)` guard handles gracefully; `start()` is a no-op on iOS < 16.2. [`src/hooks/useLiveActivity.ts`]
+- **8h JS-side clock resets after draft recovery** — `sessionStartRef` restarts from recovery time, not original start; native `staleDate` (set at session `start()`) correctly handles the real 8h timeout independently. [`src/hooks/useLiveActivity.ts`]
+- **`sessionId` change mid-session re-triggers `start()`** — ID is stable per session; acceptable tradeoff for simplicity. [`src/hooks/useLiveActivity.ts`]
+- **DI expanded layout correctness** — `leading`/`trailing` slots use compact views with full content in `bottom`; valid SwiftUI DI layout pattern but needs on-device testing to confirm. [`ios/GhostRivalWidgetExtension/GhostRivalWidget.swift`]
+- **Rapid phase toggle races `end()`/`start()`** — Extremely unlikely UX path; native Swift guards on `currentActivityId`. [`src/hooks/useLiveActivity.ts`]
+- **Native module per-method existence check absent** — If `GhostRivalLiveActivity` exists but individual methods are missing, `mod.start` throws a swallowed TypeError. Extremely unlikely if module is correctly scaffolded. [`src/modules/live-activity/LiveActivityModule.ios.ts`]
+
 ## Deferred from: code review of 2-2-android-floating-bubble (2026-06-21)
 
 - **Native FloatingBubbleService.kt scaffold stubs** — `updateBubbleDisplay()`, `triggerAtZeroPulse()`, `sendTapEvent()`, `sendLongPressEvent()`, and permission revocation event are stub implementations. AC4 visual spec, AC5 pulse animation, AC6 tap event, AC7 long-press edit sheet, AC10 revocation event must be completed in native iteration. [`android/.../FloatingBubbleService.kt`]

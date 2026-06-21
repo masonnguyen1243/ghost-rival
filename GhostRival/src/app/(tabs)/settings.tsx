@@ -8,6 +8,7 @@ import {
   Alert,
   StyleSheet,
   Platform,
+  Linking,
 } from 'react-native'
 import {
   SURFACE_BASE,
@@ -38,6 +39,8 @@ export default function SettingsScreen() {
   const defaultRestTimerSeconds = useSettingsStore((s) => s.defaultRestTimerSeconds)
   const hasShownBubblePrompt = useSettingsStore((s) => s.hasShownBubblePrompt)
   const bubbleEnabled = useSettingsStore((s) => s.bubbleEnabled)
+  const hasShownLiveActivityPrompt = useSettingsStore((s) => s.hasShownLiveActivityPrompt)
+  const liveActivityEnabled = useSettingsStore((s) => s.liveActivityEnabled)
   const [renaming, setRenaming] = useState<RenameState | null>(null)
   const [restTimerEditId, setRestTimerEditId] = useState<string | null>(null)
   const [restTimerDraft, setRestTimerDraft] = useState<string>('')
@@ -268,19 +271,38 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {Platform.OS === 'android' && hasShownBubblePrompt && !bubbleEnabled && (
+      {(
+        (Platform.OS === 'android' && hasShownBubblePrompt && !bubbleEnabled) ||
+        (Platform.OS === 'ios' && hasShownLiveActivityPrompt && !liveActivityEnabled)
+      ) && (
         <>
           <Text style={styles.sectionHeader}>SESSION</Text>
           <View style={styles.settingCard}>
-            <TouchableOpacity
-              style={styles.settingRow}
-              onPress={() => FloatingBubbleModule.openPermissionSettings()}
-              accessibilityRole="button"
-              accessibilityLabel="Enable Ghost Bubble overlay permission"
-            >
-              <Text style={styles.settingLabel}>Enable Ghost Bubble</Text>
-              <Text style={styles.settingChevron}>›</Text>
-            </TouchableOpacity>
+            {Platform.OS === 'android' && hasShownBubblePrompt && !bubbleEnabled && (
+              <TouchableOpacity
+                style={styles.settingRow}
+                onPress={() => FloatingBubbleModule.openPermissionSettings()}
+                accessibilityRole="button"
+                accessibilityLabel="Enable Ghost Bubble overlay permission"
+              >
+                <Text style={styles.settingLabel}>Enable Ghost Bubble</Text>
+                <Text style={styles.settingChevron}>›</Text>
+              </TouchableOpacity>
+            )}
+            {Platform.OS === 'ios' && hasShownLiveActivityPrompt && !liveActivityEnabled && (
+              <TouchableOpacity
+                style={styles.settingRow}
+                onPress={() => Linking.openSettings()}
+                accessibilityRole="button"
+                accessibilityLabel="Enable Live Activities in iOS Settings"
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.settingLabel}>Enable Live Activities</Text>
+                  <Text style={styles.settingSubLabel}>See your rest timer from any screen</Text>
+                </View>
+                <Text style={styles.settingChevron}>›</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </>
       )}
@@ -501,6 +523,12 @@ const styles = StyleSheet.create({
     color: INK_PRIMARY,
     fontFamily: 'DMSans_400Regular',
     fontSize: 16,
+  },
+  settingSubLabel: {
+    color: INK_SECONDARY,
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 13,
+    marginTop: 2,
   },
   settingChevron: {
     color: INK_SECONDARY,

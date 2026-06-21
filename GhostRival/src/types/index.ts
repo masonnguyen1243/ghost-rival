@@ -58,6 +58,15 @@ export interface BubbleOptions {
 
 export type BubblePermissionStatus = 'granted' | 'denied' | 'not_determined'
 
+export interface LiveActivityOptions {
+  exerciseName: string
+  timerSeconds: number
+  timerRunning: boolean
+  sessionId: string
+}
+
+export type LiveActivityPermissionStatus = 'granted' | 'denied' | 'not_determined'
+
 export type SyncOperation = 'insert' | 'update' | 'delete'
 
 export type SessionPhase = 'idle' | 'active' | 'draft'

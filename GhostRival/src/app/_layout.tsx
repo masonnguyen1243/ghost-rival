@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, Text, Platform } from 'react-native'
+import { View, Text, Platform, Linking } from 'react-native'
 import { Stack, router } from 'expo-router'
 import { addNotificationResponseReceivedListener } from 'expo-notifications'
 import { setupNotificationChannel } from '../lib/bubbleNotification'
@@ -78,6 +78,22 @@ export default function RootLayout() {
           })
         } catch {}
         return () => { sub?.remove() }
+      }
+
+      // iOS deep-link handler for Live Activity tap (AC4)
+      if (Platform.OS === 'ios') {
+        const sub = Linking.addEventListener('url', (event) => {
+          if (event.url === 'ghostrival://session') {
+            router.replace('/session/active')
+          }
+        })
+        // Handle cold-start URL (app was not running when Live Activity was tapped)
+        Linking.getInitialURL().then((url) => {
+          if (url === 'ghostrival://session') {
+            router.replace('/session/active')
+          }
+        }).catch(() => {})
+        return () => sub.remove()
       }
     }
   }, [fontsLoaded, migrationsSuccess])
