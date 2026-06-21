@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, and, isNull, asc, desc } from 'drizzle-orm'
 import { db } from '../client'
 import { sessions, sets } from '../schema'
 
@@ -15,7 +15,10 @@ export async function endSession(id: string): Promise<void> {
 }
 
 export async function discardSession(id: string): Promise<void> {
-  await db.delete(sessions).where(eq(sessions.id, id))
+  await db.transaction(async (tx) => {
+    await tx.delete(sets).where(eq(sets.session_id, id))
+    await tx.delete(sessions).where(eq(sessions.id, id))
+  })
 }
 
 export async function getSessionSetCount(sessionId: string): Promise<number> {
@@ -24,4 +27,36 @@ export async function getSessionSetCount(sessionId: string): Promise<number> {
     .from(sets)
     .where(eq(sets.session_id, sessionId))
   return result[0]?.count ?? 0
+}
+
+export async function getDraftSession(): Promise<{ id: string; started_at: number } | null> {
+  const result = await db
+    .select({ id: sessions.id, started_at: sessions.started_at })
+    .from(sessions)
+    .where(and(isNull(sessions.ended_at), eq(sessions.is_draft, true)))
+    .orderBy(desc(sessions.started_at))
+    .limit(1)
+  return result[0] ?? null
+}
+
+export async function getExerciseIdsForSession(sessionId: string): Promise<string[]> {
+  const rows = await db
+    .select({ exerciseId: sets.exercise_id, loggedAt: sets.logged_at })
+    .from(sets)
+    .where(eq(sets.session_id, sessionId))
+    .orderBy(asc(sets.logged_at))
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const row of rows) {
+    if (!seen.has(row.exerciseId)) {
+      seen.add(row.exerciseId)
+      result.push(row.exerciseId)
+    }
+  }
+  return result
+}
+
+export async function saveSessionAsComplete(id: string): Promise<void> {
+  const now = Math.floor(Date.now() / 1000)
+  await db.update(sessions).set({ ended_at: now, is_draft: false }).where(eq(sessions.id, id))
 }

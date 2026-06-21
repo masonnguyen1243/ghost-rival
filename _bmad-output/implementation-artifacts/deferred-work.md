@@ -1,5 +1,10 @@
 # Deferred Work
 
+## Deferred from: code review of 1-6-draft-session-recovery-resume-and-discard (2026-06-21)
+
+- **Dead hook exports in useSessions.ts** — `checkAndGetDraftSession`, `resumeDraftSession`, `saveSessionAsComplete` are exported but never called from the recovery flow (design decision per dev notes, but creates maintenance confusion). [src/hooks/useSessions.ts]
+- **`saveSessionAsComplete` allows zero-set sessions** — No guard prevents an empty draft from being marked complete and appearing in session history. No spec constraint against this; revisit if data quality issues surface. [src/db/queries/sessions.queries.ts]
+
 ## Deferred from: code review of 1-5-cardio-set-logging (2026-06-20)
 
 - **`'kg' | 'lb'` unit type used as distance unit in cardio mapper functions** — Semantic mismatch; works at runtime by convention ('lb'→miles, else→km). Pre-existing SettingsStore design. Revisit if unit system is ever expanded. [src/db/mappers/cardio.mapper.ts]

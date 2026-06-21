@@ -64,5 +64,44 @@ export function useSessions() {
     }
   }, [])
 
-  return { startSession, endSession, discardSession, getSetCount }
+  const checkAndGetDraftSession = useCallback(async (): Promise<{ id: string; started_at: number } | null> => {
+    try {
+      return await SessionsQueries.getDraftSession()
+    } catch (e) {
+      console.error('[Sessions] getDraftSession failed:', e)
+      return null
+    }
+  }, [])
+
+  const resumeDraftSession = useCallback(async (draft: { id: string; started_at: number }): Promise<boolean> => {
+    try {
+      const exerciseIds = await SessionsQueries.getExerciseIdsForSession(draft.id)
+      useSessionStore.setState({
+        activeSessionId: draft.id,
+        sessionStartedAt: draft.started_at,
+        phase: 'active',
+        sessionExerciseIds: exerciseIds,
+        // restTimerSeconds and restTimerRunning intentionally NOT set — keep at default
+      })
+      return true
+    } catch (e) {
+      console.error('[Sessions] resumeDraftSession failed:', e)
+      showToast('Could not resume session. Try again.', 'error')
+      return false
+    }
+  }, [])
+
+  const saveSessionAsComplete = useCallback(async (sessionId: string): Promise<boolean> => {
+    try {
+      await SessionsQueries.saveSessionAsComplete(sessionId)
+      // Store is already empty after app kill — no reset needed
+      return true
+    } catch (e) {
+      console.error('[Sessions] saveSessionAsComplete failed:', e)
+      showToast('Could not save session. Try again.', 'error')
+      return false
+    }
+  }, [])
+
+  return { startSession, endSession, discardSession, getSetCount, checkAndGetDraftSession, resumeDraftSession, saveSessionAsComplete }
 }

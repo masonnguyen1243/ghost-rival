@@ -13,6 +13,7 @@ export const FEEDBACK_ERROR = '#ff4444'
 
 // Operational constants
 export const DEFAULT_REST_TIMER_SECONDS = 90
+export const DRAFT_STALE_THRESHOLD_S = 7200
 export const MERCY_DAYS_PER_MONTH = 2
 export const GHOST_DIM_OPACITY = 0.40
 export const BUBBLE_SLA_MS = 200

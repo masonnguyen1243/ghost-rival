@@ -16,6 +16,15 @@ jest.mock('../client', () => ({
     where: jest.fn().mockReturnThis(),
     set: jest.fn().mockReturnThis(),
     values: jest.fn().mockResolvedValue(undefined),
+    transaction: jest.fn(async (fn: Function) => {
+      const txMock = {
+        delete: jest.fn().mockReturnThis(),
+        where: jest.fn().mockResolvedValue(undefined),
+      }
+      return fn(txMock)
+    }),
+    limit: jest.fn().mockResolvedValue([]),
+    orderBy: jest.fn().mockResolvedValue([]),
   },
 }))
 
@@ -28,6 +37,8 @@ jest.mock('../schema', () => ({
   },
   sets: {
     session_id: 'session_id',
+    exercise_id: 'exercise_id',
+    logged_at: 'logged_at',
   },
 }))
 
@@ -37,6 +48,10 @@ jest.mock('drizzle-orm', () => ({
     jest.fn((strings: TemplateStringsArray, ...values: unknown[]) => ({ type: 'sql', strings, values })),
     { raw: jest.fn() },
   ),
+  and: jest.fn((...args) => ({ type: 'and', args })),
+  isNull: jest.fn((col) => ({ type: 'isNull', col })),
+  asc: jest.fn((col) => ({ type: 'asc', col })),
+  desc: jest.fn((col) => ({ type: 'desc', col })),
 }))
 
 import {
@@ -44,6 +59,9 @@ import {
   endSession,
   discardSession,
   getSessionSetCount,
+  getDraftSession,
+  getExerciseIdsForSession,
+  saveSessionAsComplete,
 } from './sessions.queries'
 import { db } from '../client'
 
@@ -56,9 +74,18 @@ beforeEach(() => {
   ;(mockDb.update as jest.Mock).mockReturnValue(mockDb)
   ;(mockDb.delete as jest.Mock).mockReturnValue(mockDb)
   ;(mockDb.from as jest.Mock).mockReturnValue(mockDb)
-  ;(mockDb.where as jest.Mock).mockResolvedValue(undefined)
+  ;(mockDb.where as jest.Mock).mockReturnValue(mockDb)
   ;(mockDb.set as jest.Mock).mockReturnValue(mockDb)
   ;(mockDb.values as jest.Mock).mockResolvedValue(undefined)
+  ;(mockDb.limit as jest.Mock).mockResolvedValue([])
+  ;(mockDb.orderBy as jest.Mock).mockResolvedValue([])
+  ;(mockDb.transaction as jest.Mock).mockImplementation(async (fn: Function) => {
+    const txMock = {
+      delete: jest.fn().mockReturnThis(),
+      where: jest.fn().mockResolvedValue(undefined),
+    }
+    return fn(txMock)
+  })
 })
 
 describe('startSession', () => {
@@ -126,10 +153,20 @@ describe('endSession', () => {
 })
 
 describe('discardSession', () => {
-  it('deletes the session by id', async () => {
+  it('deletes sets then session in a transaction', async () => {
     await discardSession('session-id-1')
-    expect(mockDb.delete).toHaveBeenCalled()
-    expect(mockDb.where).toHaveBeenCalled()
+    expect(mockDb.transaction).toHaveBeenCalled()
+    const txFn = (mockDb.transaction as jest.Mock).mock.calls[0][0]
+    const txMock = {
+      delete: jest.fn().mockReturnThis(),
+      where: jest.fn().mockResolvedValue(undefined),
+    }
+    await txFn(txMock)
+    expect(txMock.delete).toHaveBeenCalledTimes(2)
+    // sets must be deleted before sessions to avoid FK orphan risk
+    const { sets: setsSchema, sessions: sessionsSchema } = require('../schema')
+    expect(txMock.delete.mock.calls[0][0]).toBe(setsSchema)
+    expect(txMock.delete.mock.calls[1][0]).toBe(sessionsSchema)
   })
 })
 
@@ -153,5 +190,80 @@ describe('getSessionSetCount', () => {
     ;(mockDb.where as jest.Mock).mockResolvedValue([])
     const count = await getSessionSetCount('session-id-1')
     expect(count).toBe(0)
+  })
+})
+
+describe('getDraftSession', () => {
+  it('returns null when no draft session exists', async () => {
+    ;(mockDb.orderBy as jest.Mock).mockReturnValue(mockDb)
+    ;(mockDb.limit as jest.Mock).mockResolvedValue([])
+    const result = await getDraftSession()
+    expect(result).toBeNull()
+  })
+
+  it('returns id and started_at when a draft exists', async () => {
+    const draft = { id: 'draft-id-1', started_at: 1700000000 }
+    ;(mockDb.orderBy as jest.Mock).mockReturnValue(mockDb)
+    ;(mockDb.limit as jest.Mock).mockResolvedValue([draft])
+    const result = await getDraftSession()
+    expect(result).toEqual(draft)
+  })
+
+  it('uses desc ordering to surface most recent draft first', async () => {
+    ;(mockDb.orderBy as jest.Mock).mockReturnValue(mockDb)
+    ;(mockDb.limit as jest.Mock).mockResolvedValue([])
+    await getDraftSession()
+    expect(mockDb.orderBy).toHaveBeenCalled()
+  })
+})
+
+describe('saveSessionAsComplete', () => {
+  it('calls update with is_draft: false and epoch ended_at', async () => {
+    const before = Math.floor(Date.now() / 1000)
+    await saveSessionAsComplete('session-id-1')
+    const after = Math.floor(Date.now() / 1000)
+
+    expect(mockDb.update).toHaveBeenCalled()
+    expect(mockDb.set).toHaveBeenCalled()
+    const call = (mockDb.set as jest.Mock).mock.calls[0][0]
+    expect(call.is_draft).toBe(false)
+    expect(call.ended_at).toBeGreaterThanOrEqual(before)
+    expect(call.ended_at).toBeLessThanOrEqual(after)
+  })
+
+  it('uses epoch seconds for ended_at', async () => {
+    await saveSessionAsComplete('session-id-1')
+    const call = (mockDb.set as jest.Mock).mock.calls[0][0]
+    expect(call.ended_at).toBeGreaterThan(1e9)
+    expect(call.ended_at).toBeLessThan(1e11)
+  })
+})
+
+describe('getExerciseIdsForSession', () => {
+  it('returns empty array when session has no sets', async () => {
+    ;(mockDb.orderBy as jest.Mock).mockResolvedValue([])
+    const result = await getExerciseIdsForSession('session-id-1')
+    expect(result).toEqual([])
+  })
+
+  it('returns exercise IDs in insertion order (by logged_at)', async () => {
+    ;(mockDb.orderBy as jest.Mock).mockResolvedValue([
+      { exerciseId: 'ex-1', loggedAt: 100 },
+      { exerciseId: 'ex-2', loggedAt: 200 },
+      { exerciseId: 'ex-3', loggedAt: 300 },
+    ])
+    const result = await getExerciseIdsForSession('session-id-1')
+    expect(result).toEqual(['ex-1', 'ex-2', 'ex-3'])
+  })
+
+  it('deduplicates exercise IDs correctly', async () => {
+    ;(mockDb.orderBy as jest.Mock).mockResolvedValue([
+      { exerciseId: 'ex-1', loggedAt: 100 },
+      { exerciseId: 'ex-2', loggedAt: 200 },
+      { exerciseId: 'ex-1', loggedAt: 300 },
+      { exerciseId: 'ex-2', loggedAt: 400 },
+    ])
+    const result = await getExerciseIdsForSession('session-id-1')
+    expect(result).toEqual(['ex-1', 'ex-2'])
   })
 })
