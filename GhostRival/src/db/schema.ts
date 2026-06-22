@@ -7,6 +7,7 @@ export const exercises = sqliteTable('exercises', {
   created_at: integer('created_at').notNull(),
   deleted_at: integer('deleted_at'),
   rest_timer_seconds: integer('rest_timer_seconds'),
+  user_id: text('user_id'),
 })
 
 export const sessions = sqliteTable('sessions', {
@@ -14,6 +15,7 @@ export const sessions = sqliteTable('sessions', {
   started_at: integer('started_at').notNull(),
   ended_at: integer('ended_at'),
   is_draft: integer('is_draft', { mode: 'boolean' }).notNull().default(true),
+  user_id: text('user_id'),
 })
 
 export const sets = sqliteTable('sets', {
@@ -37,6 +39,7 @@ export const ghosts = sqliteTable('ghosts', {
   duration_s: integer('duration_s'),
   distance_m: real('distance_m'),
   updated_at: integer('updated_at').notNull(),
+  user_id: text('user_id'),
 }, (table) => [
   uniqueIndex('ghosts_exercise_type_unique').on(table.exercise_id, table.type),
 ])
@@ -49,6 +52,7 @@ export const hall_of_fame = sqliteTable('hall_of_fame', {
   previous_value: real('previous_value'),
   session_id: text('session_id').references(() => sessions.id),
   achieved_at: integer('achieved_at').notNull(),
+  user_id: text('user_id'),
 }, (table) => [
   uniqueIndex('hall_of_fame_exercise_pr_type_unique').on(table.exercise_id, table.pr_type),
 ])

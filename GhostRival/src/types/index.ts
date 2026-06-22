@@ -81,3 +81,20 @@ export interface DbSet {
   distance_m: number | null
   logged_at: number
 }
+
+export interface DisplayGhost {
+  id: string
+  exerciseId: string
+  type: GhostType
+  sessionId: string | null
+  weightKg: number | null
+  reps: number | null
+  durationS: number | null
+  distanceM: number | null
+  updatedAt: Date
+  narrativeCopy: string
+  valueDisplay: string
+  badgeLabel: string
+}
+
+export type LocalUserId = string

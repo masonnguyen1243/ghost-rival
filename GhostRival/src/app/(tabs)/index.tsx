@@ -1,41 +1,52 @@
+import { useState } from 'react'
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
 import { router } from 'expo-router'
 import {
   SURFACE_BASE,
-  SURFACE_RAISED,
-  INK_PRIMARY,
-  INK_SECONDARY,
-  INK_DISABLED,
   GHOST_ACCENT,
 } from '../../constants'
+import { useSettingsStore } from '../../stores/useSettingsStore'
+import { mapDbGhostToDisplay } from '../../db/mappers/ghost.mapper'
 import { EmptyState } from '../../components/common/EmptyState'
-import { useExercises } from '../../hooks/useExercises'
+import { GhostRow } from '../../components/ghost/GhostRow'
+import { GhostTypeSelector } from '../../components/ghost/GhostTypeSelector'
+import { useGhostRows } from '../../hooks/useGhostRows'
 import { useSessionStore } from '../../stores/useSessionStore'
 import { useSessions } from '../../hooks/useSessions'
-import type { DisplayExercise } from '../../types'
-
-function ExercisePlaceholderRow({ exercise }: { exercise: DisplayExercise }) {
-  return (
-    <View style={styles.exerciseCard}>
-      <View style={styles.exerciseCardLeft}>
-        <Text style={styles.exerciseName}>{exercise.name}</Text>
-        <Text style={styles.ghostForming}>Your ghost is forming.</Text>
-      </View>
-      <Text style={styles.typeTag}>{exercise.type.toUpperCase()}</Text>
-    </View>
-  )
-}
+import { getAllGhostsForExercise } from '../../db/queries/ghost.queries'
+import type { GhostType } from '../../types'
+import type { DisplayGhost } from '../../db/mappers/ghost.mapper'
 
 export default function HomeScreen() {
-  const { exercises } = useExercises()
+  const { exercisesWithGhosts } = useGhostRows()
   const phase = useSessionStore((s) => s.phase)
+  const activeSessionId = useSessionStore((s) => s.activeSessionId)
+  const unit = useSettingsStore((s) => s.unit)
   const { startSession } = useSessions()
+  const [selectorExerciseId, setSelectorExerciseId] = useState<string | null>(null)
+  const [selectorAllGhosts, setSelectorAllGhosts] = useState<Array<{ type: GhostType; ghost: DisplayGhost | null }>>([])
+  const [selectorCurrentType, setSelectorCurrentType] = useState<GhostType>('last_session')
 
   const handleStartWorkout = async () => {
     const ok = await startSession()
     if (ok) {
       router.push('/session/active')
     }
+  }
+
+  const handleGhostRowPress = async (exerciseId: string, currentType: GhostType) => {
+    const allDbGhosts = await getAllGhostsForExercise(exerciseId, activeSessionId ?? null)
+    const allTypes: GhostType[] = ['last_session', 'last_week', 'last_month', 'all_time_pr']
+    const ghostMap = allTypes.map((type) => {
+      const found = allDbGhosts.find((g) => g.type === type) ?? null
+      if (!found || (found.weight_kg === null && found.reps === null && found.duration_s === null)) {
+        return { type, ghost: null as DisplayGhost | null }
+      }
+      return { type, ghost: mapDbGhostToDisplay(found, unit) }
+    })
+    setSelectorAllGhosts(ghostMap)
+    setSelectorCurrentType(currentType)
+    setSelectorExerciseId(exerciseId)
   }
 
   return (
@@ -52,7 +63,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       )}
 
-      {exercises.length === 0 ? (
+      {exercisesWithGhosts.length === 0 ? (
         <View style={styles.flex}>
           <EmptyState
             headline="No exercises yet."
@@ -61,13 +72,26 @@ export default function HomeScreen() {
         </View>
       ) : (
         <ScrollView style={styles.flex} contentContainerStyle={styles.content}>
-          <Text style={styles.subtitle}>
-            Come back after your next session and you'll have a ghost to chase.
-          </Text>
-          {exercises.map((exercise) => (
-            <ExercisePlaceholderRow key={exercise.id} exercise={exercise} />
+          {exercisesWithGhosts.map(({ exercise, ghost, isFallback }) => (
+            <GhostRow
+              key={exercise.id}
+              exercise={exercise}
+              ghost={ghost}
+              isFallback={isFallback}
+              onPress={() => handleGhostRowPress(exercise.id, ghost?.type ?? 'last_session')}
+            />
           ))}
         </ScrollView>
+      )}
+
+      {selectorExerciseId !== null && (
+        <GhostTypeSelector
+          exerciseId={selectorExerciseId}
+          currentType={selectorCurrentType}
+          allGhosts={selectorAllGhosts}
+          onSelect={(type) => setSelectorCurrentType(type)}
+          onClose={() => setSelectorExerciseId(null)}
+        />
       )}
 
       {/* Start Workout FAB — visible only when idle */}
@@ -108,40 +132,6 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontFamily: 'DMSans_600SemiBold',
     fontSize: 14,
-  },
-  subtitle: {
-    color: INK_SECONDARY,
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 14,
-    marginBottom: 16,
-  },
-  exerciseCard: {
-    backgroundColor: SURFACE_RAISED,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  exerciseCardLeft: {
-    flex: 1,
-  },
-  exerciseName: {
-    color: INK_PRIMARY,
-    fontFamily: 'DMSans_700Bold',
-    fontSize: 18,
-    marginBottom: 4,
-  },
-  ghostForming: {
-    color: INK_SECONDARY,
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 13,
-  },
-  typeTag: {
-    color: INK_DISABLED,
-    fontFamily: 'DMSans_500Medium',
-    fontSize: 10,
-    letterSpacing: 0.5,
   },
   fab: {
     position: 'absolute',

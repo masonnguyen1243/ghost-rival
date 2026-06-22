@@ -3,6 +3,8 @@ import { View, Text, Platform, Linking } from 'react-native'
 import { Stack, router } from 'expo-router'
 import { addNotificationResponseReceivedListener } from 'expo-notifications'
 import { setupNotificationChannel } from '../lib/bubbleNotification'
+import { getOrCreateLocalUserId } from '../lib/localUser'
+import { sql } from 'drizzle-orm'
 import type { ErrorBoundaryProps } from 'expo-router'
 import { useFonts } from 'expo-font'
 import {
@@ -61,6 +63,27 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded && migrationsSuccess) {
       SplashScreen.hideAsync()
+
+      // AC-0: generate/retrieve local user identity and backfill existing rows.
+      // Each table is independently guarded — a failure on one does not abort the others (AC-0).
+      getOrCreateLocalUserId().then((localUserId) => {
+        const backfills = [
+          sql`UPDATE exercises SET user_id = ${localUserId} WHERE user_id IS NULL`,
+          sql`UPDATE sessions SET user_id = ${localUserId} WHERE user_id IS NULL`,
+          sql`UPDATE ghosts SET user_id = ${localUserId} WHERE user_id IS NULL`,
+          sql`UPDATE hall_of_fame SET user_id = ${localUserId} WHERE user_id IS NULL`,
+        ]
+        for (const stmt of backfills) {
+          try {
+            db.run(stmt)
+          } catch (e) {
+            console.error('[localUser] backfill error', e)
+          }
+        }
+      }).catch((e) => {
+        console.error('[localUser] init error', e)
+      })
+
       SessionsQueries.getDraftSession()
         .then(setDraftSession)
         .catch(() => setDraftSession(null))

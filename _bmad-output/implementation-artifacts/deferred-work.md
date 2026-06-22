@@ -1,5 +1,13 @@
 # Deferred Work
 
+## Deferred from: code review of 3-1-ghost-type-selection-and-home-tab-ghost-row (2026-06-22)
+
+- **useGhostRows fetches all ghost rows with no SQL filter** — unbounded in-memory scan ordered by updated_at; grows with every exercise and session. Acceptable for MVP but revisit before store submission. [`GhostRival/src/hooks/useGhostRows.ts`]
+- **setActiveGhostType placeholder rows accumulate with no cleanup path** — zombie rows with all-null metrics pile up indefinitely; isPlaceholder check handles display correctly but table grows. [`GhostRival/src/db/queries/ghost.queries.ts`]
+- **getOrCreateLocalUserId not atomic on first launch** — two concurrent calls (unlikely on mobile) can generate two UUIDs before either writes; last write wins. [`GhostRival/src/lib/localUser.ts`]
+- **mapDbGhostToDisplay assumes ms timestamps** — if a future sync path inserts seconds-based updated_at, new Date() produces 1970 dates and formatGhostCopy returns wrong copy. [`GhostRival/src/db/mappers/ghost.mapper.ts`]
+- **formatGhostCopy daysDiff negative for future timestamps (clock skew)** — silently falls into weekday branch instead of surfacing an error. [`GhostRival/src/lib/formatGhostCopy.ts`]
+
 ## Deferred from: code review of 2-4-rest-timer-skip-and-extend-from-bubble (2026-06-21)
 
 - **`useFloatingBubble` registers skip/extend listeners without platform guard** — Same mount-only `useEffect` that registers `onSkipRest`/`onExtendRest` also registered `onTap`/`onLongPress`/`onPermissionRevoked` in prior stories with no crash. Pre-existing pattern; investigate platform guard when iOS Floating Bubble support is added. [`src/hooks/useFloatingBubble.ts`]

@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-19
-last_updated: 2026-06-21  # updated: 2-1 to done, 2-2 to done (code review applied all patches); 2-3 to done (code review applied 9 patches); 2-4 to ready-for-dev; 2-4 to review; 2-4 to done (code review applied 7 patches)
+last_updated: 2026-06-22  # updated: 2-1 to done, 2-2 to done (code review applied all patches); 2-3 to done (code review applied 9 patches); 2-4 to ready-for-dev; 2-4 to review; 2-4 to done (code review applied 7 patches); epic-3 to in-progress; 3-1 to ready-for-dev; 3-1 to in-progress; 3-1 to review; 3-1 to done (code review applied 8 patches)
 project: test-project
 
 project_key: NOKEY
@@ -68,8 +68,8 @@ development_status:
   # ──────────────────────────────────────────
   # Epic 3: Ghost Rival System & PR Celebration
   # ──────────────────────────────────────────
-  epic-3: backlog
-  3-1-ghost-type-selection-and-home-tab-ghost-row: backlog
+  epic-3: in-progress
+  3-1-ghost-type-selection-and-home-tab-ghost-row: done
   3-2-live-ghost-comparison-during-session: backlog
   3-3-pr-detection-engine: backlog
   3-4-hall-of-fame-view-and-ghost-retirement: backlog
